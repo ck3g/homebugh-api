@@ -17,6 +17,9 @@ type config struct {
 		CertPemFile string `yaml:"cert_pem_file"`
 		KeyPemFile  string `yaml:"key_pem_file"`
 	} `yaml:"tls"`
+	Server struct {
+		Addr string `yaml:"addr"`
+	} `yaml:"server"`
 }
 
 func main() {
@@ -45,14 +48,15 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:      ":8080",
+		Addr:      cfg.Server.Addr,
 		Handler:   app.routes(),
 		TLSConfig: tlsConfig,
 	}
 
 	fmt.Printf("Listening on %s, CTRL+C to stop\n", srv.Addr)
 	err = srv.ListenAndServeTLS(cfg.TLS.CertPemFile, cfg.TLS.KeyPemFile)
-	if err == nil {
+	if err != nil {
+		fmt.Println(err)
 		panic("Cannot start the API server")
 	}
 }
