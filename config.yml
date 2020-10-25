@@ -1,0 +1,3 @@
+tls:
+  cert_pem_file: "./tls/cert.pem"
+  key_pem_file: "./tls/key.pem"
