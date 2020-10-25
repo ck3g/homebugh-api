@@ -10,7 +10,7 @@ import (
 func TestHealth(t *testing.T) {
 	app := application{}
 
-	ts := httptest.NewServer(app.routes())
+	ts := httptest.NewTLSServer(app.routes())
 	defer ts.Close()
 
 	rs, err := ts.Client().Get(ts.URL + "/health")
