@@ -31,7 +31,7 @@ func (app *application) createToken(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(f.Get("email"))
 	password := strings.TrimSpace(f.Get("password"))
 
-	if email == "" || password == "" {
+	if email != "user@example.com" || password != "password" {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		w.Write([]byte(`{"result": "Error", "message": "Invalid credentials"}`))
 		return
