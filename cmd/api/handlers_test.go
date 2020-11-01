@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 )
 
@@ -43,41 +43,39 @@ func TestCreateToken(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		email    string
-		password string
+		body     []byte
 		wantCode int
 		wantBody []byte
 	}{
 		{
 			name:     "Valid credentials",
-			email:    "user@example.com",
-			password: "password",
+			body:     []byte(`{"email": "user@example.com", "password": "password"}`),
 			wantCode: http.StatusCreated,
 			wantBody: []byte(`{"result": "OK", "token": "valid-token"}`),
 		},
 		{
 			name:     "Empty email",
-			email:    "",
-			password: "password",
+			body:     []byte(`{"email": "", "password": "password"}`),
 			wantCode: http.StatusUnprocessableEntity,
 			wantBody: []byte(`{"result": "Error", "message": "Invalid credentials"}`),
 		},
 		{
 			name:     "Empty password",
-			email:    "user@example.com",
-			password: "",
+			body:     []byte(`{"email": "user@example.com", "password": ""}`),
 			wantCode: http.StatusUnprocessableEntity,
 			wantBody: []byte(`{"result": "Error", "message": "Invalid credentials"}`),
+		},
+		{
+			name:     "Invalid JSON body",
+			body:     []byte(`{"email"`),
+			wantCode: http.StatusBadRequest,
+			wantBody: []byte("Bad Request\n"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			form := url.Values{}
-			form.Add("email", tt.email)
-			form.Add("password", tt.password)
-
-			rs, err := ts.Client().PostForm(ts.URL+"/token", form)
+			rs, err := ts.Client().Post(ts.URL+"/token", "application/json", bytes.NewReader(tt.body))
 			if err != nil {
 				t.Fatal(err)
 			}
