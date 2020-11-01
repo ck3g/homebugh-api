@@ -1,10 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 )
+
+type createTokenRequestBody struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
 
 func (app *application) health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -21,15 +27,15 @@ func (app *application) createToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := r.ParseForm()
+	var req createTokenRequestBody
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
-	f := r.PostForm
-	email := strings.TrimSpace(f.Get("email"))
-	password := strings.TrimSpace(f.Get("password"))
+	email := strings.TrimSpace(req.Email)
+	password := strings.TrimSpace(req.Password)
 
 	if email != "user@example.com" || password != "password" {
 		w.WriteHeader(http.StatusUnprocessableEntity)
