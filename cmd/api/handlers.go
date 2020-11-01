@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -32,10 +33,12 @@ func (app *application) createToken(w http.ResponseWriter, r *http.Request) {
 
 	if email == "" || password == "" {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write([]byte(`{"result": "Error"}`))
+		w.Write([]byte(`{"result": "Error", "message": "Invalid credentials"}`))
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"result": "OK"}`))
+	token := "valid-token"
+	rBody := fmt.Sprintf(`{"result": "OK", "token": "%s"}`, token)
+	w.Write([]byte(rBody))
 }

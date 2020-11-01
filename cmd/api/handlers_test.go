@@ -48,9 +48,27 @@ func TestCreateToken(t *testing.T) {
 		wantCode int
 		wantBody []byte
 	}{
-		{"Valid credentials", "user@example.com", "password", http.StatusCreated, []byte(`{"result": "OK"}`)},
-		{"Empty email", "", "password", http.StatusUnprocessableEntity, []byte(`{"result": "Error"}`)},
-		{"Empty password", "user@example.com", "", http.StatusUnprocessableEntity, []byte(`{"result": "Error"}`)},
+		{
+			name:     "Valid credentials",
+			email:    "user@example.com",
+			password: "password",
+			wantCode: http.StatusCreated,
+			wantBody: []byte(`{"result": "OK", "token": "valid-token"}`),
+		},
+		{
+			name:     "Empty email",
+			email:    "",
+			password: "password",
+			wantCode: http.StatusUnprocessableEntity,
+			wantBody: []byte(`{"result": "Error", "message": "Invalid credentials"}`),
+		},
+		{
+			name:     "Empty password",
+			email:    "user@example.com",
+			password: "",
+			wantCode: http.StatusUnprocessableEntity,
+			wantBody: []byte(`{"result": "Error", "message": "Invalid credentials"}`),
+		},
 	}
 
 	for _, tt := range tests {
