@@ -66,3 +66,14 @@ func (m *UserModel) Get(id int) (*models.User, error) {
 
 	return u, nil
 }
+
+// Delete removes a user by ID
+func (m *UserModel) Delete(id int) error {
+	stmt := `DELETE FROM users WHERE id = ?`
+	_, err := m.DB.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

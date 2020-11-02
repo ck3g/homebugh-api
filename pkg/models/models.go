@@ -26,4 +26,5 @@ type User struct {
 type UserStorage interface {
 	Insert(email, password string) (User, error)
 	Get(id int) (*User, error)
+	Delete(id int) error
 }
