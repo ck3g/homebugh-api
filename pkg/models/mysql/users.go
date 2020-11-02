@@ -40,11 +40,29 @@ func (m *UserModel) Insert(email, password string) (models.User, error) {
 		return user, err
 	}
 
+	now := time.Now()
 	user = models.User{
 		Email:             email,
 		EncryptedPassword: encryptedPassword,
-		CreatedAt:         time.Now(),
+		CreatedAt:         &now,
 	}
 
 	return user, nil
+}
+
+// Get fetches a user by ID. Returns an error if the user not found
+func (m *UserModel) Get(id int) (*models.User, error) {
+	u := &models.User{}
+
+	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at FROM users WHERE id = ?`
+	err := m.DB.QueryRow(stmt, id).Scan(&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.ConfirmedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.ErrNoRecord
+		}
+
+		return nil, err
+	}
+
+	return u, nil
 }
