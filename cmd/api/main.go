@@ -2,15 +2,20 @@ package main
 
 import (
 	"crypto/tls"
+	"database/sql"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/ck3g/homebugh-api/pkg/models"
+	"github.com/ck3g/homebugh-api/pkg/models/mysql"
 	"gopkg.in/yaml.v2"
 )
 
-type application struct{}
+type application struct {
+	users models.UserStorage
+}
 
 type config struct {
 	TLS struct {
@@ -40,7 +45,16 @@ func main() {
 		panic("cannot parse the config file")
 	}
 
-	app := &application{}
+	dsn := "root@/homebugh_test?parseTime=true"
+	db, err := openDB(dsn)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	app := &application{
+		users: &mysql.UserModel{DB: db},
+	}
 
 	tlsConfig := &tls.Config{
 		PreferServerCipherSuites: true,
@@ -59,4 +73,16 @@ func main() {
 		fmt.Println(err)
 		panic("Cannot start the API server")
 	}
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
