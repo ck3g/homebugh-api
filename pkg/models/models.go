@@ -24,7 +24,7 @@ type User struct {
 
 // UserStorage defines interface to storing and retrieving user data
 type UserStorage interface {
-	Insert(email, password string) (User, error)
-	Get(id int) (*User, error)
-	Delete(id int) error
+	Insert(email, password string) (int64, error)
+	Get(id int64) (*User, error)
+	Delete(id int64) error
 }

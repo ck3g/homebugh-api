@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/ck3g/homebugh-api/pkg/models"
 	"github.com/go-sql-driver/mysql"
@@ -17,41 +16,40 @@ type UserModel struct {
 }
 
 // Insert creates a new user in the database
-func (m *UserModel) Insert(email, password string) (models.User, error) {
-	user := models.User{}
+func (m *UserModel) Insert(email, password string) (int64, error) {
+	var id int64
+
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return user, err
+		return id, err
 	}
 
 	stmt := `INSERT INTO users (email, encrypted_password, password_salt, created_at)
 	VALUES (?, ?, "", UTC_TIMESTAMP())`
 
-	_, err = m.DB.Exec(stmt, email, string(encryptedPassword))
+	res, err := m.DB.Exec(stmt, email, string(encryptedPassword))
 	if err != nil {
 		var mySQLError *mysql.MySQLError
 		if errors.As(err, &mySQLError) {
 			// Check if MySQL error is a email constraint violation
 			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users_uc_email") {
-				return user, models.ErrDuplicateEmail
+				return id, models.ErrDuplicateEmail
 			}
 		}
 
-		return user, err
+		return id, err
 	}
 
-	now := time.Now()
-	user = models.User{
-		Email:             email,
-		EncryptedPassword: encryptedPassword,
-		CreatedAt:         &now,
+	id, err = res.LastInsertId()
+	if err != nil {
+		return id, err
 	}
 
-	return user, nil
+	return id, nil
 }
 
 // Get fetches a user by ID. Returns an error if the user not found
-func (m *UserModel) Get(id int) (*models.User, error) {
+func (m *UserModel) Get(id int64) (*models.User, error) {
 	u := &models.User{}
 
 	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at FROM users WHERE id = ?`
@@ -68,7 +66,7 @@ func (m *UserModel) Get(id int) (*models.User, error) {
 }
 
 // Delete removes a user by ID
-func (m *UserModel) Delete(id int) error {
+func (m *UserModel) Delete(id int64) error {
 	stmt := `DELETE FROM users WHERE id = ?`
 	_, err := m.DB.Exec(stmt, id)
 	if err != nil {
