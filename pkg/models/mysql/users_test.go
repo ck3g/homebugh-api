@@ -69,3 +69,37 @@ func TestInsert(t *testing.T) {
 	})
 
 }
+
+func TestGet(t *testing.T) {
+	db, err := openDB(dsn)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	users := &UserModel{DB: db}
+
+	t.Run("fetch existing user", func(t *testing.T) {
+		id, err := users.Insert("user@example.com", "password")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer users.Delete(id)
+
+		u, err := users.Get(id)
+		if err != nil {
+			t.Fatalf("expect to receive user iwth ID %d", id)
+		}
+
+		if u.ID != id {
+			t.Errorf("want ID %d; got %d", id, u.ID)
+		}
+	})
+
+	t.Run("fetch non-existing user", func(t *testing.T) {
+		_, err := users.Get(-1)
+		if !errors.Is(err, models.ErrNoRecord) {
+			t.Errorf("want error %s; got %s", models.ErrNoRecord, err)
+		}
+	})
+}
