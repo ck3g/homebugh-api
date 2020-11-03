@@ -103,3 +103,33 @@ func TestGet(t *testing.T) {
 		}
 	})
 }
+
+func TestDelete(t *testing.T) {
+	db, err := openDB(dsn)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	users := &UserModel{DB: db}
+
+	id, err := users.Insert("user@example.com", "password")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	u, err := users.Get(id)
+	if err != nil {
+		t.Errorf("want no errors; got %s", err)
+	}
+
+	err = users.Delete(u.ID)
+	if err != nil {
+		t.Errorf("want no errors: got %s", err)
+	}
+
+	u, err = users.Get(u.ID)
+	if !errors.Is(err, models.ErrNoRecord) {
+		t.Errorf("want error %s; found user with id %d", models.ErrNoRecord, u.ID)
+	}
+}
