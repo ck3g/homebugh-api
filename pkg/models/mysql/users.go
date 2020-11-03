@@ -32,7 +32,7 @@ func (m *UserModel) Insert(email, password string) (int64, error) {
 		var mySQLError *mysql.MySQLError
 		if errors.As(err, &mySQLError) {
 			// Check if MySQL error is a email constraint violation
-			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "users_uc_email") {
+			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "index_users_on_email") {
 				return id, models.ErrDuplicateEmail
 			}
 		}

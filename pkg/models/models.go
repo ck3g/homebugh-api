@@ -15,7 +15,7 @@ var (
 
 // User represents a user data
 type User struct {
-	ID                int
+	ID                int64
 	Email             string
 	EncryptedPassword []byte
 	CreatedAt         *time.Time
