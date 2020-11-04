@@ -7,6 +7,7 @@ import (
 
 	"github.com/ck3g/homebugh-api/pkg/models"
 	"github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -65,6 +66,24 @@ func (m *UserModel) Get(id int64) (*models.User, error) {
 	return u, nil
 }
 
+// GetByEmail fetches a user by email. Returns a Zero value if the user not found
+func (m *UserModel) GetByEmail(email string) (*models.User, error) {
+	u := &models.User{}
+
+	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at FROM users WHERE email = ?`
+	err := m.DB.QueryRow(stmt, strings.ToLower(email)).
+		Scan(&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.ConfirmedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return u, models.ErrNoRecord
+		}
+
+		return u, err
+	}
+
+	return u, nil
+}
+
 // Delete removes a user by ID
 func (m *UserModel) Delete(id int64) error {
 	stmt := `DELETE FROM users WHERE id = ?`
@@ -74,4 +93,29 @@ func (m *UserModel) Delete(id int64) error {
 	}
 
 	return nil
+}
+
+// Authenticate check the user crendentials and generate auth token
+func (m *UserModel) Authenticate(email, password string) (string, error) {
+	token := ""
+
+	u, err := m.GetByEmail(email)
+	if err != nil {
+		return token, err
+	}
+
+	err = bcrypt.CompareHashAndPassword(u.EncryptedPassword, []byte(password))
+	if err != nil {
+		return token, models.ErrWrongPassword
+	}
+
+	newToken, err := uuid.NewRandom()
+	if err != nil {
+		return token, err
+	}
+
+	// TODO: Update auth_sessions table. Insert a new token
+	token = newToken.String()
+
+	return token, nil
 }
