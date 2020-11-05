@@ -10,6 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// TODO: Extract to test utils
 const dsn = "root@/homebugh_test?parseTime=true"
 
 func openDB(dsn string) (*sql.DB, error) {
