@@ -18,15 +18,15 @@ type AuthSessionModel struct {
 func (m *AuthSessionModel) Insert(userID int64, token string) (int64, error) {
 	var id int64
 
-	stmt := `INSERT INTO auth_sessions (user_id, token, created_at, expired_at)
-	VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 2 WEEK)`
+	stmt := `INSERT INTO auth_sessions (user_id, token, expired_at, created_at, updated_at)
+	VALUES(?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 2 WEEK), UTC_TIMESTAMP(), UTC_TIMESTAMP())`
 
 	res, err := m.DB.Exec(stmt, userID, token)
 	if err != nil {
 		var mySQLError *mysql.MySQLError
 		if errors.As(err, &mySQLError) {
 			// Check if MySQL error is a token constraint violation
-			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "todo_change") {
+			if mySQLError.Number == 1062 && strings.Contains(mySQLError.Message, "auth_sessions_on_token") {
 				return id, models.ErrDuplicateToken
 			}
 		}
@@ -51,7 +51,7 @@ func (m *AuthSessionModel) Get(id int64) (*models.AuthSession, error) {
 	err := m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.UserID, &s.Token, &s.CreatedAt, &s.ExpiredAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, err
+			return nil, models.ErrNoRecord
 		}
 
 		return nil, err
