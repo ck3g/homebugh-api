@@ -8,9 +8,9 @@ server:
 database:
   production:
     driver: "mysql"
-    database: homebugh_development
+    database: homebugh
     username: "root"
-    password: ""
+    password: "super-secure"
   development:
     driver: "mysql"
     database: homebugh_development
