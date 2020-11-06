@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"database/sql"
 	"errors"
 	"testing"
 
@@ -10,36 +9,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// TODO: Extract to test utils
-const dsn = "root@/homebugh_test?parseTime=true"
-
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, err
-	}
-	if err = db.Ping(); err != nil {
-		return nil, err
-	}
-
-	return db, nil
-}
-
-func TestInsert(t *testing.T) {
-	db, err := openDB(dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	users := &UserModel{DB: db}
-
+func TestUserInsert(t *testing.T) {
 	t.Run("successful insert", func(t *testing.T) {
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		users := &UserModel{db}
+
 		id, err := users.Insert("user@example.com", "password")
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer users.Delete(id)
 
 		u, err := users.Get(id)
 		if err != nil {
@@ -57,11 +37,15 @@ func TestInsert(t *testing.T) {
 	})
 
 	t.Run("duplicate email", func(t *testing.T) {
-		id, err := users.Insert("user@example.com", "password")
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		users := &UserModel{db}
+
+		_, err := users.Insert("user@example.com", "password")
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer users.Delete(id)
 
 		_, err = users.Insert("user@example.com", "password")
 		if !errors.Is(err, models.ErrDuplicateEmail) {
@@ -71,16 +55,13 @@ func TestInsert(t *testing.T) {
 
 }
 
-func TestGet(t *testing.T) {
-	db, err := openDB(dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	users := &UserModel{DB: db}
-
+func TestUserGet(t *testing.T) {
 	t.Run("fetch existing user", func(t *testing.T) {
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		users := &UserModel{db}
+
 		id, err := users.Insert("user@example.com", "password")
 		if err != nil {
 			t.Fatal(err)
@@ -98,6 +79,11 @@ func TestGet(t *testing.T) {
 	})
 
 	t.Run("fetch non-existing user", func(t *testing.T) {
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		users := &UserModel{db}
+
 		_, err := users.Get(-1)
 		if !errors.Is(err, models.ErrNoRecord) {
 			t.Errorf("want error %s; got %s", models.ErrNoRecord, err)
@@ -106,18 +92,14 @@ func TestGet(t *testing.T) {
 }
 
 func TestGetByEmail(t *testing.T) {
-	db, err := openDB(dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	db, teardown := newTestDB(t)
+	defer teardown()
 
-	users := &UserModel{DB: db}
+	users := &UserModel{db}
 	id, err := users.Insert("user@example.com", "password")
 	if err != nil {
 		panic(err)
 	}
-	defer users.Delete(id)
 
 	tests := []struct {
 		name      string
@@ -146,13 +128,10 @@ func TestGetByEmail(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	db, err := openDB(dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	db, teardown := newTestDB(t)
+	defer teardown()
 
-	users := &UserModel{DB: db}
+	users := &UserModel{db}
 
 	id, err := users.Insert("user@example.com", "password")
 	if err != nil {
@@ -176,21 +155,16 @@ func TestDelete(t *testing.T) {
 }
 
 func TestAuthenticate(t *testing.T) {
-	db, err := openDB(dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	db, teardown := newTestDB(t)
+	defer teardown()
 
-	users := &UserModel{DB: db}
-	id, err := users.Insert("user@example.com", "password")
+	users := &UserModel{db}
+	_, err := users.Insert("user@example.com", "password")
 	if err != nil {
 		panic(err)
 	}
-	defer users.Delete(id)
 
 	t.Run("successful auth", func(t *testing.T) {
-
 		token, err := users.Authenticate("user@example.com", "password")
 		if token == "" {
 			t.Errorf("incorrect token: want token; got blank")

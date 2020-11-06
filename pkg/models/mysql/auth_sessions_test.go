@@ -9,20 +9,16 @@ import (
 )
 
 func TestAuthSessionInsert(t *testing.T) {
-	db, err := openDB(dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	sessions := &AuthSessionModel{DB: db}
-
 	t.Run("successful insert", func(t *testing.T) {
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		sessions := &AuthSessionModel{db}
+
 		id, err := sessions.Insert(1, "unique-token")
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer sessions.Delete(id)
 
 		s, err := sessions.Get(id)
 		if err != nil {
@@ -46,11 +42,15 @@ func TestAuthSessionInsert(t *testing.T) {
 	})
 
 	t.Run("duplicated token", func(t *testing.T) {
-		id, err := sessions.Insert(1, "unique-token")
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		sessions := &AuthSessionModel{db}
+
+		_, err := sessions.Insert(1, "unique-token")
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer sessions.Delete(id)
 
 		_, err = sessions.Insert(1, "unique-token")
 		if !errors.Is(err, models.ErrDuplicateToken) {
@@ -60,20 +60,16 @@ func TestAuthSessionInsert(t *testing.T) {
 }
 
 func TestAuthSessionGet(t *testing.T) {
-	db, err := openDB(dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	sessions := &AuthSessionModel{DB: db}
-
 	t.Run("fetch existing auth session", func(t *testing.T) {
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		sessions := &AuthSessionModel{db}
+
 		id, err := sessions.Insert(1, "token")
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer sessions.Delete(id)
 
 		s, err := sessions.Get(id)
 		if err != nil {
@@ -86,6 +82,11 @@ func TestAuthSessionGet(t *testing.T) {
 	})
 
 	t.Run("fetch non-existing auth session", func(t *testing.T) {
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		sessions := &AuthSessionModel{db}
+
 		_, err := sessions.Get(-1)
 		if !errors.Is(err, models.ErrNoRecord) {
 			t.Errorf("want error %s; got %s", models.ErrNoRecord, err)
@@ -95,11 +96,8 @@ func TestAuthSessionGet(t *testing.T) {
 }
 
 func TestAuthSessionDelete(t *testing.T) {
-	db, err := openDB(dsn)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+	db, teardown := newTestDB(t)
+	defer teardown()
 
 	sessions := &AuthSessionModel{DB: db}
 
