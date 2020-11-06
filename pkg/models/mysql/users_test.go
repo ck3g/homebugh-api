@@ -208,7 +208,20 @@ func TestAuthenticate(t *testing.T) {
 			t.Errorf("wrong error returned: want nil; got %s", err)
 		}
 
-		// TODO: check if there is a new row in `auth_sessions` table with `token` in it
+		// check if there is a new row in `auth_sessions` table with `token` in it
+		sessions := &AuthSessionModel{db}
+		s, err := sessions.GetByToken(token)
+		if err != nil {
+			t.Errorf("don't want errors; got %s", err)
+		}
+
+		if s.Token != token {
+			t.Errorf("want session with token %s; got %s", token, s.Token)
+		}
+
+		if s.UserID != id {
+			t.Errorf("want user_id %d; got %d", id, s.UserID)
+		}
 	})
 
 	tests := []struct {
@@ -250,7 +263,12 @@ func TestAuthenticate(t *testing.T) {
 				t.Errorf("wrong error returned: want %v; got %v", tt.wantError, err)
 			}
 
-			// TODO: check there are no new rows in `auth_sessions` table
+			// check there are no new rows in `auth_sessions` table
+			sessions := &AuthSessionModel{db}
+			_, err = sessions.GetByToken(token)
+			if !errors.Is(err, models.ErrNoRecord) {
+				t.Errorf("want error %s; got %s", models.ErrNoRecord, err)
+			}
 		})
 	}
 }

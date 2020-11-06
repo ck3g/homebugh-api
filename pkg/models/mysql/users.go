@@ -120,29 +120,32 @@ func (m *UserModel) Delete(id int64) error {
 
 // Authenticate check the user crendentials and generate auth token
 func (m *UserModel) Authenticate(email, password string) (string, error) {
-	token := ""
-
 	u, err := m.GetByEmail(email)
 	if err != nil {
-		return token, err
+		return "", err
 	}
 
 	if !u.ConfirmedAt.Valid {
-		return token, models.ErrUserNotConfirmed
+		return "", models.ErrUserNotConfirmed
 	}
 
 	err = bcrypt.CompareHashAndPassword(u.EncryptedPassword, []byte(password))
 	if err != nil {
-		return token, models.ErrWrongPassword
+		return "", models.ErrWrongPassword
 	}
 
 	newToken, err := uuid.NewRandom()
 	if err != nil {
-		return token, err
+		return "", err
 	}
 
-	// TODO: Update auth_sessions table. Insert a new token
-	token = newToken.String()
+	token := newToken.String()
+
+	sessions := &AuthSessionModel{m.DB}
+	_, err = sessions.Insert(u.ID, token)
+	if err != nil {
+		return "", err
+	}
 
 	return token, nil
 }
