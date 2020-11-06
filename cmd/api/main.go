@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/ck3g/homebugh-api/pkg/models"
 	"github.com/ck3g/homebugh-api/pkg/models/mysql"
@@ -17,19 +18,12 @@ type application struct {
 	users models.UserStorage
 }
 
-type config struct {
-	TLS struct {
-		CertPemFile string `yaml:"cert_pem_file"`
-		KeyPemFile  string `yaml:"key_pem_file"`
-	} `yaml:"tls"`
-	Server struct {
-		Addr string `yaml:"addr"`
-	} `yaml:"server"`
-}
-
 func main() {
 	configFile := flag.String("config", "./config.yml", "The app configuration file path")
+	environment := flag.String("env", "development", "Current app environment. [production|development|test]")
 	flag.Parse()
+
+	env := setEnv(*environment)
 
 	f, err := os.Open(*configFile)
 	if err != nil {
@@ -45,8 +39,7 @@ func main() {
 		panic("cannot parse the config file")
 	}
 
-	dsn := "root@/homebugh_test?parseTime=true"
-	db, err := openDB(dsn)
+	db, err := openDB(cfg.dsn(env))
 	if err != nil {
 		panic(err)
 	}
@@ -67,6 +60,8 @@ func main() {
 		TLSConfig: tlsConfig,
 	}
 
+	fmt.Println()
+	fmt.Printf("The application starting in %s\n", env)
 	fmt.Printf("Listening on %s, CTRL+C to stop\n", srv.Addr)
 	err = srv.ListenAndServeTLS(cfg.TLS.CertPemFile, cfg.TLS.KeyPemFile)
 	if err != nil {
@@ -85,4 +80,14 @@ func openDB(dsn string) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func setEnv(env string) string {
+	for _, e := range []string{"test", "development", "production"} {
+		if e == strings.ToLower(env) {
+			return e
+		}
+	}
+
+	return "development"
 }
