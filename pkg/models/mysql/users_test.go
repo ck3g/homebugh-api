@@ -9,6 +9,39 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func TestUserConfirm(t *testing.T) {
+	db, teardown := newTestDB(t)
+	defer teardown()
+
+	users := &UserModel{db}
+
+	t.Run("Confirm non-confirmed user", func(t *testing.T) {
+		id, err := users.Insert("user@example.com", "password")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		u, err := users.Get(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = users.Confirm(id)
+		if err != nil {
+			t.Errorf("want error to be nil; got %s", err)
+		}
+
+		u, err = users.Get(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !u.ConfirmedAt.Valid {
+			t.Errorf("want confirmed_at to be set; got nil")
+		}
+	})
+}
+
 func TestUserInsert(t *testing.T) {
 	t.Run("successful insert", func(t *testing.T) {
 		db, teardown := newTestDB(t)
@@ -155,16 +188,17 @@ func TestDelete(t *testing.T) {
 }
 
 func TestAuthenticate(t *testing.T) {
-	db, teardown := newTestDB(t)
-	defer teardown()
-
-	users := &UserModel{db}
-	_, err := users.Insert("user@example.com", "password")
-	if err != nil {
-		panic(err)
-	}
-
 	t.Run("successful auth", func(t *testing.T) {
+		db, teardown := newTestDB(t)
+		defer teardown()
+
+		users := &UserModel{db}
+		id, err := users.Insert("user@example.com", "password")
+		if err != nil {
+			panic(err)
+		}
+
+		users.Confirm(id)
 		token, err := users.Authenticate("user@example.com", "password")
 		if token == "" {
 			t.Errorf("incorrect token: want token; got blank")
@@ -181,14 +215,31 @@ func TestAuthenticate(t *testing.T) {
 		name      string
 		email     string
 		password  string
+		confirmed bool
 		wantError error
 	}{
-		{"Wrong email", "no-user@example.com", "password", models.ErrNoRecord},
-		{"Wrong password", "user@example.com", "wrong-pass", models.ErrWrongPassword},
+		{"Wrong email", "no-user@example.com", "password", true, models.ErrNoRecord},
+		{"Wrong password", "user@example.com", "wrong-pass", true, models.ErrWrongPassword},
+		{"Not confirmed", "user@example.com", "password", false, models.ErrUserNotConfirmed},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			db, teardown := newTestDB(t)
+			defer teardown()
+
+			users := &UserModel{db}
+			id, err := users.Insert("user@example.com", "password")
+			if err != nil {
+				panic(err)
+			}
+
+			if tt.confirmed {
+				if err := users.Confirm(id); err != nil {
+					t.Fatal(err)
+				}
+			}
+
 			token, err := users.Authenticate(tt.email, tt.password)
 
 			if token != "" {

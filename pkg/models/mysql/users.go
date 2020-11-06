@@ -16,7 +16,27 @@ type UserModel struct {
 	DB *sql.DB
 }
 
-// Insert creates a new user in the database
+// Confirm confirms a not-confirmed user. Returns error if the user does not exists
+func (m *UserModel) Confirm(id int64) error {
+	u, err := m.Get(id)
+	if err != nil {
+		return err
+	}
+
+	if u.ConfirmedAt.Valid {
+		return nil
+	}
+
+	stmt := `UPDATE users SET confirmed_at = UTC_TIMESTAMP(), updated_at = UTC_TIMESTAMP() WHERE id = ?`
+	_, err = m.DB.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Insert creates a not-confirmed user in the database
 func (m *UserModel) Insert(email, password string) (int64, error) {
 	var id int64
 
@@ -107,12 +127,14 @@ func (m *UserModel) Authenticate(email, password string) (string, error) {
 		return token, err
 	}
 
+	if !u.ConfirmedAt.Valid {
+		return token, models.ErrUserNotConfirmed
+	}
+
 	err = bcrypt.CompareHashAndPassword(u.EncryptedPassword, []byte(password))
 	if err != nil {
 		return token, models.ErrWrongPassword
 	}
-
-	// TODO: check if user confirmed. Otherwise return error
 
 	newToken, err := uuid.NewRandom()
 	if err != nil {
