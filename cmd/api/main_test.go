@@ -16,9 +16,11 @@ func TestMainSetEnv(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		env := setEnv(tt.env)
-		if env != tt.wantEnv {
-			t.Errorf("want %s; got %s", tt.env, env)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			env := setEnv(tt.env)
+			if env != tt.wantEnv {
+				t.Errorf("want %s; got %s", tt.env, env)
+			}
+		})
 	}
 }
