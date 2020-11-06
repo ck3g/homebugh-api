@@ -3,6 +3,8 @@ package models
 import (
 	"errors"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -17,6 +19,9 @@ var (
 
 	// ErrWrongPassword recived when the password is incorrect
 	ErrWrongPassword = errors.New("users: wrong password")
+
+	// ErrUserNotConfirmed received when user is not confirmed
+	ErrUserNotConfirmed = errors.New("users: not confirmed")
 )
 
 // AuthSession represents authentication session data
@@ -33,6 +38,7 @@ type AuthSession struct {
 type AuthSessionStorage interface {
 	Insert(userID int64, token string) (int64, error)
 	Get(id int64) (*AuthSession, error)
+	GetByToken(token string) (*AuthSession, error)
 	Delete(id int64) error
 }
 
@@ -42,14 +48,16 @@ type User struct {
 	Email             string
 	EncryptedPassword []byte
 	CreatedAt         *time.Time
-	ConfirmedAt       *time.Time
+	UpdatedAt         *time.Time
+	ConfirmedAt       mysql.NullTime // https://medium.com/aubergine-solutions/how-i-handled-null-possible-values-from-database-rows-in-golang-521fb0ee267
 }
 
 // UserStorage defines interface to storing and retrieving user data
 type UserStorage interface {
-	Insert(email, password string) (int64, error)
+	Authenticate(email, password string) (string, error)
+	Confirm(id int64) error
 	Get(id int64) (*User, error)
 	GetByEmail(email string) (*User, error)
+	Insert(email, password string) (int64, error)
 	Delete(id int64) error
-	Authenticate(email, password string) (string, error)
 }

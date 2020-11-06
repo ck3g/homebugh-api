@@ -16,7 +16,27 @@ type UserModel struct {
 	DB *sql.DB
 }
 
-// Insert creates a new user in the database
+// Confirm confirms a not-confirmed user. Returns error if the user does not exists
+func (m *UserModel) Confirm(id int64) error {
+	u, err := m.Get(id)
+	if err != nil {
+		return err
+	}
+
+	if u.ConfirmedAt.Valid {
+		return nil
+	}
+
+	stmt := `UPDATE users SET confirmed_at = UTC_TIMESTAMP(), updated_at = UTC_TIMESTAMP() WHERE id = ?`
+	_, err = m.DB.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Insert creates a not-confirmed user in the database
 func (m *UserModel) Insert(email, password string) (int64, error) {
 	var id int64
 
@@ -25,8 +45,8 @@ func (m *UserModel) Insert(email, password string) (int64, error) {
 		return id, err
 	}
 
-	stmt := `INSERT INTO users (email, encrypted_password, password_salt, created_at)
-	VALUES (?, ?, "", UTC_TIMESTAMP())`
+	stmt := `INSERT INTO users (email, encrypted_password, password_salt, created_at, updated_at)
+	VALUES (?, ?, "", UTC_TIMESTAMP(), UTC_TIMESTAMP())`
 
 	res, err := m.DB.Exec(stmt, email, string(encryptedPassword))
 	if err != nil {
@@ -53,8 +73,10 @@ func (m *UserModel) Insert(email, password string) (int64, error) {
 func (m *UserModel) Get(id int64) (*models.User, error) {
 	u := &models.User{}
 
-	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at FROM users WHERE id = ?`
-	err := m.DB.QueryRow(stmt, id).Scan(&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.ConfirmedAt)
+	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at, updated_at FROM users WHERE id = ?`
+	err := m.DB.QueryRow(stmt, id).Scan(
+		&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.ConfirmedAt, &u.UpdatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord
@@ -70,9 +92,10 @@ func (m *UserModel) Get(id int64) (*models.User, error) {
 func (m *UserModel) GetByEmail(email string) (*models.User, error) {
 	u := &models.User{}
 
-	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at FROM users WHERE email = ?`
-	err := m.DB.QueryRow(stmt, strings.ToLower(email)).
-		Scan(&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.ConfirmedAt)
+	stmt := `SELECT id, email, encrypted_password, created_at, updated_at, confirmed_at FROM users WHERE email = ?`
+	err := m.DB.QueryRow(stmt, strings.ToLower(email)).Scan(
+		&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.UpdatedAt, &u.ConfirmedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return u, models.ErrNoRecord
@@ -97,25 +120,32 @@ func (m *UserModel) Delete(id int64) error {
 
 // Authenticate check the user crendentials and generate auth token
 func (m *UserModel) Authenticate(email, password string) (string, error) {
-	token := ""
-
 	u, err := m.GetByEmail(email)
 	if err != nil {
-		return token, err
+		return "", err
+	}
+
+	if !u.ConfirmedAt.Valid {
+		return "", models.ErrUserNotConfirmed
 	}
 
 	err = bcrypt.CompareHashAndPassword(u.EncryptedPassword, []byte(password))
 	if err != nil {
-		return token, models.ErrWrongPassword
+		return "", models.ErrWrongPassword
 	}
 
 	newToken, err := uuid.NewRandom()
 	if err != nil {
-		return token, err
+		return "", err
 	}
 
-	// TODO: Update auth_sessions table. Insert a new token
-	token = newToken.String()
+	token := newToken.String()
+
+	sessions := &AuthSessionModel{m.DB}
+	_, err = sessions.Insert(u.ID, token)
+	if err != nil {
+		return "", err
+	}
 
 	return token, nil
 }
