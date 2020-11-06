@@ -25,8 +25,8 @@ func (m *UserModel) Insert(email, password string) (int64, error) {
 		return id, err
 	}
 
-	stmt := `INSERT INTO users (email, encrypted_password, password_salt, created_at)
-	VALUES (?, ?, "", UTC_TIMESTAMP())`
+	stmt := `INSERT INTO users (email, encrypted_password, password_salt, created_at, updated_at)
+	VALUES (?, ?, "", UTC_TIMESTAMP(), UTC_TIMESTAMP())`
 
 	res, err := m.DB.Exec(stmt, email, string(encryptedPassword))
 	if err != nil {
@@ -53,8 +53,10 @@ func (m *UserModel) Insert(email, password string) (int64, error) {
 func (m *UserModel) Get(id int64) (*models.User, error) {
 	u := &models.User{}
 
-	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at FROM users WHERE id = ?`
-	err := m.DB.QueryRow(stmt, id).Scan(&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.ConfirmedAt)
+	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at, updated_at FROM users WHERE id = ?`
+	err := m.DB.QueryRow(stmt, id).Scan(
+		&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.ConfirmedAt, &u.UpdatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord
@@ -70,9 +72,10 @@ func (m *UserModel) Get(id int64) (*models.User, error) {
 func (m *UserModel) GetByEmail(email string) (*models.User, error) {
 	u := &models.User{}
 
-	stmt := `SELECT id, email, encrypted_password, created_at, confirmed_at FROM users WHERE email = ?`
-	err := m.DB.QueryRow(stmt, strings.ToLower(email)).
-		Scan(&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.ConfirmedAt)
+	stmt := `SELECT id, email, encrypted_password, created_at, updated_at, confirmed_at FROM users WHERE email = ?`
+	err := m.DB.QueryRow(stmt, strings.ToLower(email)).Scan(
+		&u.ID, &u.Email, &u.EncryptedPassword, &u.CreatedAt, &u.UpdatedAt, &u.ConfirmedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return u, models.ErrNoRecord

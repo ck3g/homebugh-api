@@ -43,6 +43,7 @@ type User struct {
 	Email             string
 	EncryptedPassword []byte
 	CreatedAt         *time.Time
+	UpdatedAt         *time.Time
 	ConfirmedAt       *time.Time
 }
 
