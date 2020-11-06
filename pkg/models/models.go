@@ -33,6 +33,7 @@ type AuthSession struct {
 type AuthSessionStorage interface {
 	Insert(userID int64, token string) (int64, error)
 	Get(id int64) (*AuthSession, error)
+	GetByToken(token string) (*AuthSession, error)
 	Delete(id int64) error
 }
 

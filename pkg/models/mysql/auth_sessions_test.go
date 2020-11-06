@@ -60,17 +60,17 @@ func TestAuthSessionInsert(t *testing.T) {
 }
 
 func TestAuthSessionGet(t *testing.T) {
+	db, teardown := newTestDB(t)
+	defer teardown()
+
+	sessions := &AuthSessionModel{db}
+
+	id, err := sessions.Insert(1, "token")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	t.Run("fetch existing auth session", func(t *testing.T) {
-		db, teardown := newTestDB(t)
-		defer teardown()
-
-		sessions := &AuthSessionModel{db}
-
-		id, err := sessions.Insert(1, "token")
-		if err != nil {
-			t.Fatal(err)
-		}
-
 		s, err := sessions.Get(id)
 		if err != nil {
 			t.Errorf("expect to receive auth session with ID %d", id)
@@ -82,17 +82,49 @@ func TestAuthSessionGet(t *testing.T) {
 	})
 
 	t.Run("fetch non-existing auth session", func(t *testing.T) {
-		db, teardown := newTestDB(t)
-		defer teardown()
-
-		sessions := &AuthSessionModel{db}
-
 		_, err := sessions.Get(-1)
 		if !errors.Is(err, models.ErrNoRecord) {
 			t.Errorf("want error %s; got %s", models.ErrNoRecord, err)
 		}
 	})
 
+}
+
+func TestAuthSessionGetByToken(t *testing.T) {
+	db, teardown := newTestDB(t)
+	defer teardown()
+
+	sessions := &AuthSessionModel{db}
+
+	token := "unique-token"
+	userID := int64(1)
+
+	_, err := sessions.Insert(userID, token)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("fetch existing auth session", func(t *testing.T) {
+		s, err := sessions.GetByToken(token)
+		if err != nil {
+			t.Errorf("expect to receive auth session with token %s", token)
+		}
+
+		if s.Token != token {
+			t.Errorf("want token %s; got %s", token, s.Token)
+		}
+
+		if s.UserID != userID {
+			t.Errorf("want user_id %d; got %d", userID, s.UserID)
+		}
+	})
+
+	t.Run("fetch non-existing auth session", func(t *testing.T) {
+		_, err := sessions.GetByToken("non-existing token")
+		if !errors.Is(err, models.ErrNoRecord) {
+			t.Errorf("want error %s; got %s", models.ErrNoRecord, err)
+		}
+	})
 }
 
 func TestAuthSessionDelete(t *testing.T) {

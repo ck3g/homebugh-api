@@ -46,9 +46,31 @@ func (m *AuthSessionModel) Insert(userID int64, token string) (int64, error) {
 func (m *AuthSessionModel) Get(id int64) (*models.AuthSession, error) {
 	s := &models.AuthSession{}
 
-	stmt := `SELECT id, user_id, token, created_at, expired_at FROM auth_sessions WHERE id = ?`
+	stmt := `SELECT id, user_id, token, expired_at, created_at, updated_at FROM auth_sessions WHERE id = ?`
 
-	err := m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.UserID, &s.Token, &s.CreatedAt, &s.ExpiredAt)
+	err := m.DB.QueryRow(stmt, id).Scan(
+		&s.ID, &s.UserID, &s.Token, &s.ExpiredAt, &s.CreatedAt, &s.UpdatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.ErrNoRecord
+		}
+
+		return nil, err
+	}
+
+	return s, nil
+}
+
+// GetByToken retrieves auth_session record by its token
+func (m *AuthSessionModel) GetByToken(token string) (*models.AuthSession, error) {
+	s := &models.AuthSession{}
+
+	stmt := `SELECT id, user_id, token, expired_at, created_at, updated_at FROM auth_sessions WHERE token = ?`
+
+	err := m.DB.QueryRow(stmt, strings.TrimSpace(token)).Scan(
+		&s.ID, &s.UserID, &s.Token, &s.ExpiredAt, &s.CreatedAt, &s.UpdatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord

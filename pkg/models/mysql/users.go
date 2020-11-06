@@ -109,6 +109,8 @@ func (m *UserModel) Authenticate(email, password string) (string, error) {
 		return token, models.ErrWrongPassword
 	}
 
+	// TODO: check if user confirmed. Otherwise return error
+
 	newToken, err := uuid.NewRandom()
 	if err != nil {
 		return token, err
