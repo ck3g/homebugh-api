@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/ck3g/homebugh-api/pkg/models/mock"
 )
 
 func TestHealth(t *testing.T) {
@@ -36,7 +38,9 @@ func TestHealth(t *testing.T) {
 }
 
 func TestCreateToken(t *testing.T) {
-	app := application{}
+	app := application{
+		users: &mock.UserModel{},
+	}
 
 	ts := httptest.NewTLSServer(app.routes())
 	defer ts.Close()
@@ -54,10 +58,22 @@ func TestCreateToken(t *testing.T) {
 			wantBody: []byte(`{"result": "OK", "token": "valid-token"}`),
 		},
 		{
+			name:     "Valid credentials with spaces",
+			body:     []byte(`{"email": " user@example.com ", "password": " password "}`),
+			wantCode: http.StatusCreated,
+			wantBody: []byte(`{"result": "OK", "token": "valid-token"}`),
+		},
+		{
+			name:     "Not confirmed user",
+			body:     []byte(`{"email": "not-confirmed@example.com", "password": "password"}`),
+			wantCode: http.StatusUnprocessableEntity,
+			wantBody: []byte(`{"result": "Error", "message": "User not confirmed"}`),
+		},
+		{
 			name:     "Empty email",
 			body:     []byte(`{"email": "", "password": "password"}`),
 			wantCode: http.StatusUnprocessableEntity,
-			wantBody: []byte(`{"result": "Error", "message": "Invalid credentials"}`),
+			wantBody: []byte(`{"result": "Error", "message": "User does not exist"}`),
 		},
 		{
 			name:     "Empty password",

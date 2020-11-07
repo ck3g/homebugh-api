@@ -2,9 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/ck3g/homebugh-api/pkg/models"
 )
 
 type createTokenRequestBody struct {
@@ -37,14 +40,32 @@ func (app *application) createToken(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(req.Email)
 	password := strings.TrimSpace(req.Password)
 
-	if email != "user@example.com" || password != "password" {
+	token, err := app.users.Authenticate(email, password)
+	if err != nil {
+		message := createTokenErrorMsg(err)
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		w.Write([]byte(`{"result": "Error", "message": "Invalid credentials"}`))
+		rBody := fmt.Sprintf(`{"result": "Error", "message": "%s"}`, message)
+		w.Write([]byte(rBody))
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	token := "valid-token"
 	rBody := fmt.Sprintf(`{"result": "OK", "token": "%s"}`, token)
 	w.Write([]byte(rBody))
+}
+
+func createTokenErrorMsg(err error) string {
+	if errors.Is(err, models.ErrNoRecord) {
+		return "User does not exist"
+	}
+
+	if errors.Is(err, models.ErrUserNotConfirmed) {
+		return "User not confirmed"
+	}
+
+	if errors.Is(err, models.ErrWrongPassword) {
+		return "Invalid credentials"
+	}
+
+	return "Something went wrong"
 }
