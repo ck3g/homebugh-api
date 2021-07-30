@@ -21,7 +21,7 @@ func TestUserConfirm(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		u, err := users.Get(id)
+		_, err = users.Get(id)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -31,7 +31,7 @@ func TestUserConfirm(t *testing.T) {
 			t.Errorf("want error to be nil; got %s", err)
 		}
 
-		u, err = users.Get(id)
+		u, err := users.Get(id)
 		if err != nil {
 			t.Fatal(err)
 		}
