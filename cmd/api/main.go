@@ -15,7 +15,7 @@ import (
 )
 
 type application struct {
-	users models.UserStorage
+	models models.Models
 }
 
 func main() {
@@ -46,7 +46,9 @@ func main() {
 	defer db.Close()
 
 	app := &application{
-		users: &mysql.UserModel{DB: db},
+		models: models.Models{
+			Users: &mysql.UserModel{DB: db},
+		},
 	}
 
 	tlsConfig := &tls.Config{

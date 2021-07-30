@@ -40,7 +40,7 @@ func (app *application) createToken(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(req.Email)
 	password := strings.TrimSpace(req.Password)
 
-	token, err := app.users.Authenticate(email, password)
+	token, err := app.models.Users.Authenticate(email, password)
 	if err != nil {
 		message := createTokenErrorMsg(err)
 		w.WriteHeader(http.StatusUnprocessableEntity)

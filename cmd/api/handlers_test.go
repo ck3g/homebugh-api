@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ck3g/homebugh-api/pkg/models"
 	"github.com/ck3g/homebugh-api/pkg/models/mock"
 )
 
@@ -39,7 +40,9 @@ func TestHealth(t *testing.T) {
 
 func TestCreateToken(t *testing.T) {
 	app := application{
-		users: &mock.UserModel{},
+		models: models.Models{
+			Users: &mock.UserModel{},
+		},
 	}
 
 	ts := httptest.NewTLSServer(app.routes())

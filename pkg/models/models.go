@@ -24,6 +24,10 @@ var (
 	ErrUserNotConfirmed = errors.New("users: not confirmed")
 )
 
+type Models struct {
+	Users UserStorage
+}
+
 // AuthSession represents authentication session data
 type AuthSession struct {
 	ID        int64
