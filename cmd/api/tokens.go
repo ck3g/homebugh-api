@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -16,8 +15,6 @@ type createTokenRequestBody struct {
 }
 
 func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -37,15 +34,22 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 	token, err := app.models.Users.Authenticate(email, password)
 	if err != nil {
 		message := createTokenErrorMsg(err)
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		rBody := fmt.Sprintf(`{"result": "Error", "message": "%s"}`, message)
-		w.Write([]byte(rBody))
+		// TODO: check for errors
+		env := envelope{
+			"result":  "Error",
+			"message": message,
+		}
+		app.writeJSON(w, http.StatusUnprocessableEntity, env, nil)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	rBody := fmt.Sprintf(`{"result": "OK", "token": "%s"}`, token)
-	w.Write([]byte(rBody))
+	env := envelope{
+		"result": "OK",
+		"token":  token,
+	}
+
+	// TODO: check for errors
+	app.writeJSON(w, http.StatusCreated, env, nil)
 }
 
 func createTokenErrorMsg(err error) string {

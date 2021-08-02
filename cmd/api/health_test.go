@@ -28,7 +28,7 @@ func TestHealthHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wantBody := `{"status": "OK"}`
+	wantBody := `{"status":"OK"}`
 	if string(body) != wantBody {
 		t.Errorf("want body to be equal to `%q`; got `%q`", wantBody, string(body))
 	}
