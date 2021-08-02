@@ -11,33 +11,6 @@ import (
 	"github.com/ck3g/homebugh-api/pkg/models/mock"
 )
 
-func TestHealthHandler(t *testing.T) {
-	app := application{}
-
-	ts := httptest.NewTLSServer(app.routes())
-	defer ts.Close()
-
-	rs, err := ts.Client().Get(ts.URL + "/health")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if rs.StatusCode != http.StatusOK {
-		t.Errorf("want status %d; got %d", http.StatusOK, rs.StatusCode)
-	}
-
-	defer rs.Body.Close()
-	body, err := ioutil.ReadAll(rs.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	wantBody := `{"status": "OK"}`
-	if string(body) != wantBody {
-		t.Errorf("want body to be equal to `%q`; got `%q`", wantBody, string(body))
-	}
-}
-
 func TestCreateTokenHandler(t *testing.T) {
 	app := application{
 		models: models.Models{
