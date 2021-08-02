@@ -23,13 +23,3 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 
 	return nil
 }
-
-func (app *application) errorReponse(w http.ResponseWriter, r *http.Request, status int, message interface{}) {
-	env := envelope{"error": message}
-
-	err := app.writeJSON(w, status, env, nil)
-	if err != nil {
-		// TODO: write into log
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-}

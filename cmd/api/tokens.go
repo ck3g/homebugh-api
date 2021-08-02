@@ -17,14 +17,14 @@ type createTokenRequestBody struct {
 func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		app.notFoundResponse(w, r)
 		return
 	}
 
 	var req createTokenRequestBody
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		app.badRequestResponse(w, r, err)
 		return
 	}
 
@@ -34,7 +34,7 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 	token, err := app.models.Users.Authenticate(email, password)
 	if err != nil {
 		message := createTokenErrorMsg(err)
-		app.errorReponse(w, r, http.StatusUnprocessableEntity, message)
+		app.validationErrorResponse(w, r, map[string]string{"token": message})
 		return
 	}
 
@@ -43,8 +43,11 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 		"token":  token,
 	}
 
-	// TODO: check for errors
-	app.writeJSON(w, http.StatusCreated, env, nil)
+	err = app.writeJSON(w, http.StatusCreated, env, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 }
 
 func createTokenErrorMsg(err error) string {
