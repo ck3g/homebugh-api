@@ -10,5 +10,5 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("/health", app.healthHandler)
 	mux.HandleFunc("/token", app.createTokenHandler)
 
-	return mux
+	return app.rateLimit(mux)
 }

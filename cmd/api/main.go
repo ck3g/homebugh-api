@@ -15,7 +15,8 @@ import (
 )
 
 type application struct {
-	models models.Models
+	environment string
+	models      models.Models
 }
 
 func main() {
@@ -46,6 +47,7 @@ func main() {
 	defer db.Close()
 
 	app := &application{
+		environment: env,
 		models: models.Models{
 			Users: &mysql.UserModel{DB: db},
 		},
