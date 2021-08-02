@@ -11,7 +11,7 @@ import (
 	"github.com/ck3g/homebugh-api/pkg/models/mock"
 )
 
-func TestHealth(t *testing.T) {
+func TestHealthHandler(t *testing.T) {
 	app := application{}
 
 	ts := httptest.NewTLSServer(app.routes())
@@ -38,7 +38,7 @@ func TestHealth(t *testing.T) {
 	}
 }
 
-func TestCreateToken(t *testing.T) {
+func TestCreateTokenHandler(t *testing.T) {
 	app := application{
 		models: models.Models{
 			Users: &mock.UserModel{},

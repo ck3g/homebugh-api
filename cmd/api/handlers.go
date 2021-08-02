@@ -15,13 +15,13 @@ type createTokenRequestBody struct {
 	Password string `json:"password"`
 }
 
-func (app *application) health(w http.ResponseWriter, r *http.Request) {
+func (app *application) healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"status": "OK"}`))
 }
 
-func (app *application) createToken(w http.ResponseWriter, r *http.Request) {
+func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != http.MethodPost {

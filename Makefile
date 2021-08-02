@@ -22,6 +22,11 @@ run/api:
 # QUALITY CONTROL
 # =========================================================================== #
 
+## test: test the code
+.PHONY: test
+test:
+	go test ./...
+
 ## audit: tidy dependencies, format, vet, and test the code
 .PHONY: audit
 audit:
