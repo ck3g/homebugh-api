@@ -34,12 +34,7 @@ func (app *application) createTokenHandler(w http.ResponseWriter, r *http.Reques
 	token, err := app.models.Users.Authenticate(email, password)
 	if err != nil {
 		message := createTokenErrorMsg(err)
-		// TODO: check for errors
-		env := envelope{
-			"result":  "Error",
-			"message": message,
-		}
-		app.writeJSON(w, http.StatusUnprocessableEntity, env, nil)
+		app.errorReponse(w, r, http.StatusUnprocessableEntity, message)
 		return
 	}
 

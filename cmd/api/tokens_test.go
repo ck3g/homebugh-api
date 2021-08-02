@@ -43,19 +43,19 @@ func TestCreateTokenHandler(t *testing.T) {
 			name:     "Not confirmed user",
 			body:     []byte(`{"email": "not-confirmed@example.com", "password": "password"}`),
 			wantCode: http.StatusUnprocessableEntity,
-			wantBody: []byte(`{"message":"User not confirmed","result":"Error"}`),
+			wantBody: []byte(`{"error":"User not confirmed"}`),
 		},
 		{
 			name:     "Empty email",
 			body:     []byte(`{"email": "", "password": "password"}`),
 			wantCode: http.StatusUnprocessableEntity,
-			wantBody: []byte(`{"message":"User does not exist","result":"Error"}`),
+			wantBody: []byte(`{"error":"User does not exist"}`),
 		},
 		{
 			name:     "Empty password",
 			body:     []byte(`{"email": "user@example.com", "password": ""}`),
 			wantCode: http.StatusUnprocessableEntity,
-			wantBody: []byte(`{"message":"Invalid credentials","result":"Error"}`),
+			wantBody: []byte(`{"error":"Invalid credentials"}`),
 		},
 		{
 			name:     "Invalid JSON body",
