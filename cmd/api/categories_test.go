@@ -13,23 +13,62 @@ func TestCategoriesHandler(t *testing.T) {
 	ts := httptest.NewTLSServer(app.routes())
 	defer ts.Close()
 
-	rs, err := ts.Client().Get(ts.URL + "/categories")
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name           string
+		token          string
+		wantStatusCode int
+		wantBody       []byte
+	}{
+		{
+			name:           "With valid token",
+			token:          "Bearer valid-token",
+			wantStatusCode: http.StatusOK,
+			wantBody:       []byte(`{"categories":[{"id":1,"name":"Food"}]}`),
+		},
+		{
+			name:           "With blank token",
+			token:          "",
+			wantStatusCode: http.StatusUnauthorized,
+			wantBody:       []byte(`{"error":"invalid or missing authentication token"}`),
+		},
+		{
+			name:           "With non bearer token",
+			token:          "Notbearer invalid-token",
+			wantStatusCode: http.StatusUnauthorized,
+			wantBody:       []byte(`{"error":"invalid or missing authentication token"}`),
+		},
+		{
+			name:           "With invalid token",
+			token:          "Bearer invalid-token",
+			wantStatusCode: http.StatusUnauthorized,
+			wantBody:       []byte(`{"error":"invalid or missing authentication token"}`),
+		},
 	}
 
-	if rs.StatusCode != http.StatusOK {
-		t.Errorf("want status %d; got %d", http.StatusOK, rs.StatusCode)
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, err := http.NewRequest("GET", ts.URL+"/categories", nil)
+			req.Header.Set("Authorization", tt.token)
+			c := ts.Client()
+			rs, err := c.Do(req)
+			// rs, err := c.Get(ts.URL + "/categories")
+			if err != nil {
+				t.Fatal(err)
+			}
 
-	defer rs.Body.Close()
-	body, err := ioutil.ReadAll(rs.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
+			if rs.StatusCode != tt.wantStatusCode {
+				t.Errorf("want status %d; got %d", tt.wantStatusCode, rs.StatusCode)
+			}
 
-	wantBody := `{"categories":[{"id":1,"name":"Food"}]}`
-	if string(body) != wantBody {
-		t.Errorf("want body to be equal to `%q`; got `%q`", wantBody, string(body))
+			defer rs.Body.Close()
+			body, err := ioutil.ReadAll(rs.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if string(body) != string(tt.wantBody) {
+				t.Errorf("want body to be equal to `%q`; got `%q`", tt.wantBody, string(body))
+			}
+		})
 	}
 }
