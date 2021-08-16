@@ -1,8 +1,6 @@
 package mock
 
 import (
-	"time"
-
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ck3g/homebugh-api/pkg/models"
@@ -10,8 +8,7 @@ import (
 )
 
 var (
-	oneDayAgo = time.Now().Add(-time.Hour * 24)
-	nullTime  = mysql.NullTime{
+	nullTime = mysql.NullTime{
 		Time:  oneDayAgo,
 		Valid: false,
 	}

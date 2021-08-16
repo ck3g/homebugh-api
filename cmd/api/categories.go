@@ -1,15 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 )
-
-type category struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-}
 
 func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Vary", "Authorization")
@@ -33,11 +27,12 @@ func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	fmt.Printf("session: %v\n", session)
-
-	categories := []category{
-		{ID: 1, Name: "Food"},
+	categories, err := app.models.Categories.All(session.UserID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
 	}
+
 	env := envelope{
 		"categories": categories,
 	}

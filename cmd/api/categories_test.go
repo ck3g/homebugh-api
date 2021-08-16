@@ -15,6 +15,7 @@ func TestCategoriesHandler(t *testing.T) {
 		models: models.Models{
 			Users:        &mock.UserModel{},
 			AuthSessions: &mock.AuthSessionModel{},
+			Categories:   &mock.CategoryModel{},
 		},
 	}
 
@@ -31,7 +32,13 @@ func TestCategoriesHandler(t *testing.T) {
 			name:           "With valid token",
 			token:          "Bearer valid-token",
 			wantStatusCode: http.StatusOK,
-			wantBody:       []byte(`{"categories":[{"id":1,"name":"Food"}]}`),
+			wantBody:       []byte(`{"categories":[{"id":1,"name":"Food","category_type_id":1,"inactive":false}]}`),
+		},
+		{
+			name:           "With valid token of second user",
+			token:          "Bearer valid-token-2",
+			wantStatusCode: http.StatusOK,
+			wantBody:       []byte(`{"categories":[{"id":2,"name":"Groceries","category_type_id":1,"inactive":false}]}`),
 		},
 		{
 			name:           "With blank token",

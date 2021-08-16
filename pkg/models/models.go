@@ -27,6 +27,7 @@ var (
 type Models struct {
 	Users        UserStorage
 	AuthSessions AuthSessionStorage
+	Categories   CategoryStorage
 }
 
 // AuthSession represents authentication session data
@@ -45,6 +46,20 @@ type AuthSessionStorage interface {
 	Get(id int64) (*AuthSession, error)
 	GetByToken(token string) (*AuthSession, error)
 	Delete(id int64) error
+}
+
+// Category represents an expense category
+type Category struct {
+	ID             int64      `json:"id"`
+	Name           string     `json:"name"`
+	CategoryTypeID int64      `json:"category_type_id"` // TODO: change to type
+	UserID         int64      `json:"-"`
+	Inactive       bool       `json:"inactive"`
+	UpdatedAt      *time.Time `json:"-"`
+}
+
+type CategoryStorage interface {
+	All(userID int64) ([]*Category, error)
 }
 
 // User represents a user data
