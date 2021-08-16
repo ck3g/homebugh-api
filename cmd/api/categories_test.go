@@ -5,10 +5,18 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/ck3g/homebugh-api/pkg/models"
+	"github.com/ck3g/homebugh-api/pkg/models/mock"
 )
 
 func TestCategoriesHandler(t *testing.T) {
-	app := application{}
+	app := application{
+		models: models.Models{
+			Users:        &mock.UserModel{},
+			AuthSessions: &mock.AuthSessionModel{},
+		},
+	}
 
 	ts := httptest.NewTLSServer(app.routes())
 	defer ts.Close()
@@ -48,6 +56,10 @@ func TestCategoriesHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, err := http.NewRequest("GET", ts.URL+"/categories", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
 			req.Header.Set("Authorization", tt.token)
 			c := ts.Client()
 			rs, err := c.Do(req)

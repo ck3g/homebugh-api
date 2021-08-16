@@ -25,7 +25,8 @@ var (
 )
 
 type Models struct {
-	Users UserStorage
+	Users        UserStorage
+	AuthSessions AuthSessionStorage
 }
 
 // AuthSession represents authentication session data

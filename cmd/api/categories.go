@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -26,10 +27,13 @@ func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	token := headerParts[1]
-	if token != "valid-token" {
+	session, err := app.models.AuthSessions.GetByToken(token)
+	if err != nil {
 		app.invalidAuthenticationTokenResponse(w, r)
 		return
 	}
+
+	fmt.Printf("session: %v\n", session)
 
 	categories := []category{
 		{ID: 1, Name: "Food"},
@@ -38,7 +42,7 @@ func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request
 		"categories": categories,
 	}
 
-	err := app.writeJSON(w, http.StatusOK, env, nil)
+	err = app.writeJSON(w, http.StatusOK, env, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
