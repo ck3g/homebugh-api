@@ -1,0 +1,64 @@
+package mysql
+
+import (
+	"database/sql"
+
+	"github.com/ck3g/homebugh-api/pkg/models"
+)
+
+type CategoryModel struct {
+	DB *sql.DB
+}
+
+func (m *CategoryModel) Insert(name string, typeID int64, userID int64, inactive bool) (int64, error) {
+	var id int64
+
+	stmt := `INSERT INTO categories (name, category_type_id, user_id, inactive, updated_at)
+	VALUES (?, ?, ?, ?, UTC_TIMESTAMP())`
+
+	res, err := m.DB.Exec(stmt, name, typeID, userID, inactive)
+	if err != nil {
+		return id, err
+	}
+
+	id, err = res.LastInsertId()
+	if err != nil {
+		return id, err
+	}
+
+	return id, nil
+}
+
+func (m *CategoryModel) All(userID int64) ([]*models.Category, error) {
+	categories := []*models.Category{}
+
+	stmt := `SELECT id, name, category_type_id, user_id, inactive, updated_at
+	FROM categories
+	WHERE user_id = ?`
+
+	rows, err := m.DB.Query(stmt, userID)
+	if err != nil {
+		return categories, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var category models.Category
+
+		err := rows.Scan(
+			&category.ID,
+			&category.Name,
+			&category.CategoryTypeID,
+			&category.UserID,
+			&category.Inactive,
+			&category.UpdatedAt,
+		)
+		if err != nil {
+			return categories, err
+		}
+
+		categories = append(categories, &category)
+	}
+
+	return categories, nil
+}

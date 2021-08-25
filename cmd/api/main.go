@@ -51,6 +51,7 @@ func main() {
 		models: models.Models{
 			Users:        &mysql.UserModel{DB: db},
 			AuthSessions: &mysql.AuthSessionModel{DB: db},
+			Categories:   &mysql.CategoryModel{DB: db},
 		},
 	}
 
