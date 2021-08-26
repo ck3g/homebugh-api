@@ -29,7 +29,7 @@ func (m *CategoryModel) Insert(name string, typeID int64, userID int64, inactive
 	return 3, nil
 }
 
-func (m *CategoryModel) All(userID int64) ([]*models.Category, error) {
+func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Category, error) {
 	var categories []*models.Category
 
 	switch userID {

@@ -29,14 +29,16 @@ func (m *CategoryModel) Insert(name string, typeID int64, userID int64, inactive
 	return id, nil
 }
 
-func (m *CategoryModel) All(userID int64) ([]*models.Category, error) {
+func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Category, error) {
 	categories := []*models.Category{}
 
 	stmt := `SELECT id, name, category_type_id, user_id, inactive, updated_at
 	FROM categories
-	WHERE user_id = ?`
+	WHERE user_id = ?
+	ORDER BY id
+	LIMIT ? OFFSET ?`
 
-	rows, err := m.DB.Query(stmt, userID)
+	rows, err := m.DB.Query(stmt, userID, filters.Limit(), filters.Offset())
 	if err != nil {
 		return categories, err
 	}
