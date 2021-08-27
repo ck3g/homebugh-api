@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 	"strings"
+
+	"github.com/ck3g/homebugh-api/pkg/models"
 )
 
 func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +29,13 @@ func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	categories, err := app.models.Categories.All(session.UserID)
+	qs := r.URL.Query()
+	filters := models.Filters{
+		Page:     app.readInt(qs, "page", 1),
+		PageSize: app.readInt(qs, "per_page", 20),
+	}
+
+	categories, err := app.models.Categories.All(session.UserID, filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
