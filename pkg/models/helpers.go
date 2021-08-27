@@ -17,6 +17,14 @@ type Metadata struct {
 	TotalRecords int `json:"total_records,omitempty"`
 }
 
+func (f Filters) CurrentPage() int {
+	if f.Page < 1 {
+		return 1
+	}
+
+	return f.Page
+}
+
 func (f Filters) Limit() int {
 	if f.PageSize < 1 || f.PageSize > 50 {
 		return defaultPageSize
@@ -26,11 +34,7 @@ func (f Filters) Limit() int {
 }
 
 func (f Filters) Offset() int {
-	if f.Page < 1 {
-		f.Page = 1
-	}
-
-	return (f.Page - 1) * f.Limit()
+	return (f.CurrentPage() - 1) * f.Limit()
 }
 
 func CalculateMetadata(totalRecords, page, pageSize int) Metadata {

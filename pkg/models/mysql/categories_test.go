@@ -77,11 +77,12 @@ func TestCategoryAll(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		wantCategories []*models.Category
-		wantCount      int
-		userID         int64
-		filters        models.Filters
+		name             string
+		wantCategories   []*models.Category
+		wantCount        int
+		wantTotalRecords int
+		userID           int64
+		filters          models.Filters
 	}{
 		{
 			name: "successful fetch for specific user",
@@ -89,55 +90,64 @@ func TestCategoryAll(t *testing.T) {
 				{ID: ids[1], Name: "Clothes"},
 				{ID: ids[2], Name: "Salary"},
 			},
-			wantCount: 2,
-			userID:    2,
-			filters:   models.Filters{Page: 1, PageSize: 20},
+			wantCount:        2,
+			wantTotalRecords: 2,
+			userID:           2,
+			filters:          models.Filters{Page: 1, PageSize: 20},
 		},
 		{
 			name: "categories from the first page",
 			wantCategories: []*models.Category{
 				{ID: ids[1], Name: "Clothes"},
 			},
-			wantCount: 1,
-			userID:    2,
-			filters:   models.Filters{Page: 1, PageSize: 1},
+			wantCount:        1,
+			wantTotalRecords: 2,
+			userID:           2,
+			filters:          models.Filters{Page: 1, PageSize: 1},
 		},
 		{
 			name: "categories from the second page",
 			wantCategories: []*models.Category{
 				{ID: ids[2], Name: "Salary"},
 			},
-			wantCount: 1,
-			userID:    2,
-			filters:   models.Filters{Page: 2, PageSize: 1},
+			wantCount:        1,
+			wantTotalRecords: 2,
+			userID:           2,
+			filters:          models.Filters{Page: 2, PageSize: 1},
 		},
 		{
-			name:           "categories from the greater than last page",
-			wantCategories: []*models.Category{},
-			wantCount:      0,
-			userID:         2,
-			filters:        models.Filters{Page: 100, PageSize: 1},
+			name:             "categories from the greater than last page",
+			wantCategories:   []*models.Category{},
+			wantCount:        0,
+			wantTotalRecords: 2,
+			userID:           2,
+			filters:          models.Filters{Page: 100, PageSize: 1},
 		},
 		{
 			name: "categories from the negative page",
 			wantCategories: []*models.Category{
 				{ID: ids[1], Name: "Clothes"},
 			},
-			wantCount: 1,
-			userID:    2,
-			filters:   models.Filters{Page: -1, PageSize: 1},
+			wantCount:        1,
+			wantTotalRecords: 2,
+			userID:           2,
+			filters:          models.Filters{Page: -1, PageSize: 1},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			all, _, err := categories.All(tt.userID, tt.filters)
+			all, metadata, err := categories.All(tt.userID, tt.filters)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			if len(all) != tt.wantCount {
 				t.Errorf("want %d categories; got %d", tt.wantCount, len(all))
+			}
+
+			if metadata.TotalRecords != tt.wantTotalRecords {
+				t.Errorf("want %d total records; got %d", tt.wantTotalRecords, metadata.TotalRecords)
 			}
 
 			for i, got := range all {

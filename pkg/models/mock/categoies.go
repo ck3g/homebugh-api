@@ -41,7 +41,7 @@ func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Cat
 		categories = []*models.Category{}
 	}
 
-	metadata := models.CalculateMetadata(1, filters.Page, filters.PageSize)
+	metadata := models.CalculateMetadata(1, filters.CurrentPage(), filters.Limit())
 
 	return categories, metadata, nil
 }

@@ -62,7 +62,14 @@ func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Cat
 		categories = append(categories, &category)
 	}
 
-	metadata := models.Metadata{}
+	totalRecords := 0
+	countStmt := `SELECT COUNT(*) FROM categories WHERE user_id = ?`
+	err = m.DB.QueryRow(countStmt, userID).Scan(&totalRecords)
+	if err != nil {
+		return categories, models.Metadata{}, err
+	}
+
+	metadata := models.CalculateMetadata(totalRecords, filters.CurrentPage(), filters.Limit())
 
 	return categories, metadata, nil
 }
