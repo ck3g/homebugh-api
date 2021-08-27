@@ -60,7 +60,7 @@ type Category struct {
 
 type CategoryStorage interface {
 	Insert(name string, typeID int64, userID int64, inactive bool) (int64, error)
-	All(userID int64, filters Filters) ([]*Category, error)
+	All(userID int64, filters Filters) ([]*Category, Metadata, error)
 }
 
 // User represents a user data

@@ -29,7 +29,7 @@ func (m *CategoryModel) Insert(name string, typeID int64, userID int64, inactive
 	return 3, nil
 }
 
-func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Category, error) {
+func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Category, models.Metadata, error) {
 	var categories []*models.Category
 
 	switch userID {
@@ -41,5 +41,7 @@ func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Cat
 		categories = []*models.Category{}
 	}
 
-	return categories, nil
+	metadata := models.CalculateMetadata(1, filters.Page, filters.PageSize)
+
+	return categories, metadata, nil
 }

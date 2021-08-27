@@ -22,7 +22,7 @@ func TestCategoryInsert(t *testing.T) {
 			PageSize: 20,
 		}
 
-		all, err := categories.All(1, filters)
+		all, _, err := categories.All(1, filters)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -131,7 +131,7 @@ func TestCategoryAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			all, err := categories.All(tt.userID, tt.filters)
+			all, _, err := categories.All(tt.userID, tt.filters)
 			if err != nil {
 				t.Fatal(err)
 			}

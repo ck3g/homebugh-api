@@ -32,10 +32,10 @@ func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request
 	qs := r.URL.Query()
 	filters := models.Filters{
 		Page:     app.readInt(qs, "page", 1),
-		PageSize: app.readInt(qs, "per_page", 20),
+		PageSize: app.readInt(qs, "page_size", 20),
 	}
 
-	categories, err := app.models.Categories.All(session.UserID, filters)
+	categories, metadata, err := app.models.Categories.All(session.UserID, filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -43,6 +43,7 @@ func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request
 
 	env := envelope{
 		"categories": categories,
+		"metadata":   metadata,
 	}
 
 	err = app.writeJSON(w, http.StatusOK, env, nil)

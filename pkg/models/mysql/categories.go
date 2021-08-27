@@ -29,7 +29,7 @@ func (m *CategoryModel) Insert(name string, typeID int64, userID int64, inactive
 	return id, nil
 }
 
-func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Category, error) {
+func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Category, models.Metadata, error) {
 	categories := []*models.Category{}
 
 	stmt := `SELECT id, name, category_type_id, user_id, inactive, updated_at
@@ -40,7 +40,7 @@ func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Cat
 
 	rows, err := m.DB.Query(stmt, userID, filters.Limit(), filters.Offset())
 	if err != nil {
-		return categories, err
+		return categories, models.Metadata{}, err
 	}
 	defer rows.Close()
 
@@ -56,11 +56,13 @@ func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Cat
 			&category.UpdatedAt,
 		)
 		if err != nil {
-			return categories, err
+			return categories, models.Metadata{}, err
 		}
 
 		categories = append(categories, &category)
 	}
 
-	return categories, nil
+	metadata := models.Metadata{}
+
+	return categories, metadata, nil
 }

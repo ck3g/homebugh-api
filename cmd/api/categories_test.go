@@ -32,13 +32,17 @@ func TestCategoriesHandler(t *testing.T) {
 			name:           "With valid token",
 			token:          "Bearer valid-token",
 			wantStatusCode: http.StatusOK,
-			wantBody:       []byte(`{"categories":[{"id":1,"name":"Food","category_type_id":1,"inactive":false}]}`),
+			wantBody: []byte(
+				`{"categories":[{"id":1,"name":"Food","category_type_id":1,"inactive":false}],` +
+					`"metadata":{"current_page":1,"page_size":20,"first_page":1,"last_page":1,"total_records":1}}`),
 		},
 		{
 			name:           "With valid token of second user",
 			token:          "Bearer valid-token-2",
 			wantStatusCode: http.StatusOK,
-			wantBody:       []byte(`{"categories":[{"id":2,"name":"Groceries","category_type_id":1,"inactive":false}]}`),
+			wantBody: []byte(
+				`{"categories":[{"id":2,"name":"Groceries","category_type_id":1,"inactive":false}],` +
+					`"metadata":{"current_page":1,"page_size":20,"first_page":1,"last_page":1,"total_records":1}}`),
 		},
 		{
 			name:           "With blank token",
