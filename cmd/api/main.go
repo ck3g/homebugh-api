@@ -49,7 +49,9 @@ func main() {
 	app := &application{
 		environment: env,
 		models: models.Models{
-			Users: &mysql.UserModel{DB: db},
+			Users:        &mysql.UserModel{DB: db},
+			AuthSessions: &mysql.AuthSessionModel{DB: db},
+			Categories:   &mysql.CategoryModel{DB: db},
 		},
 	}
 

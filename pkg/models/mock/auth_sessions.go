@@ -19,6 +19,14 @@ var (
 		CreatedAt: &twoDaysAgo,
 		UpdatedAt: &now,
 	}
+	secondMockAuthSession = &models.AuthSession{
+		ID:        2,
+		UserID:    2,
+		Token:     "valid-token-2",
+		ExpiredAt: &twoWeeksFromNow,
+		CreatedAt: &twoDaysAgo,
+		UpdatedAt: &now,
+	}
 )
 
 // AuthSessionModel represents mocked AuthSessionModel
@@ -31,20 +39,26 @@ func (m *AuthSessionModel) Insert(userID int64, token string) (int64, error) {
 
 // Get fetches mock auth session by ID
 func (m *AuthSessionModel) Get(id int64) (*models.AuthSession, error) {
-	if id == mockAuthSession.ID {
+	switch id {
+	case mockAuthSession.ID:
 		return mockAuthSession, nil
+	case secondMockAuthSession.ID:
+		return secondMockAuthSession, nil
+	default:
+		return nil, models.ErrNoRecord
 	}
-
-	return nil, models.ErrNoRecord
 }
 
 // GetByToken fetches mock auth session by token
 func (m *AuthSessionModel) GetByToken(token string) (*models.AuthSession, error) {
-	if token == mockAuthSession.Token {
+	switch token {
+	case mockAuthSession.Token:
 		return mockAuthSession, nil
+	case secondMockAuthSession.Token:
+		return secondMockAuthSession, nil
+	default:
+		return nil, models.ErrNoRecord
 	}
-
-	return nil, models.ErrNoRecord
 }
 
 // Delete drops mocked auth session
