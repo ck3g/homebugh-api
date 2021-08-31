@@ -8,7 +8,7 @@ var (
 	foodCategory = &models.Category{
 		ID:             1,
 		Name:           "Food",
-		CategoryTypeID: 1,
+		CategoryTypeID: 2,
 		UserID:         1,
 		Inactive:       false,
 		UpdatedAt:      &oneDayAgo,
@@ -16,7 +16,7 @@ var (
 	secondUserFoodCategory = &models.Category{
 		ID:             2,
 		Name:           "Groceries",
-		CategoryTypeID: 1,
+		CategoryTypeID: 2,
 		UserID:         2,
 		Inactive:       false,
 		UpdatedAt:      &oneDayAgo,
@@ -25,7 +25,7 @@ var (
 
 type CategoryModel struct{}
 
-func (m *CategoryModel) Insert(name string, typeID int64, userID int64, inactive bool) (int64, error) {
+func (m *CategoryModel) Insert(name string, categoryTypeID models.CategoryTypeID, userID int64, inactive bool) (int64, error) {
 	return 3, nil
 }
 

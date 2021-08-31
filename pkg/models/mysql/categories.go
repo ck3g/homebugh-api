@@ -10,13 +10,13 @@ type CategoryModel struct {
 	DB *sql.DB
 }
 
-func (m *CategoryModel) Insert(name string, typeID int64, userID int64, inactive bool) (int64, error) {
+func (m *CategoryModel) Insert(name string, categoryTypeID models.CategoryTypeID, userID int64, inactive bool) (int64, error) {
 	var id int64
 
 	stmt := `INSERT INTO categories (name, category_type_id, user_id, inactive, updated_at)
 	VALUES (?, ?, ?, ?, UTC_TIMESTAMP())`
 
-	res, err := m.DB.Exec(stmt, name, typeID, userID, inactive)
+	res, err := m.DB.Exec(stmt, name, categoryTypeID, userID, inactive)
 	if err != nil {
 		return id, err
 	}
