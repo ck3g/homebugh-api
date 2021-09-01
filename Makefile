@@ -45,9 +45,51 @@ audit:
 # BUILD
 # =========================================================================== #
 
+arch = 386
+build_dir = linux_${arch}
+service_name = homebugh-api
+
 ## build/api: build the cmd/api application
 .PHONY: build/api
 build/api:
 	@echo 'Building cmd/api...'
-	go build -o=./bin/api ./cmd/api
-	GOOS=linux GOARCH=amd64 go build -o=./bin/linux_amd64/api ./cmd/api
+	go build -o=./bin/${service_name} ./cmd/api
+	GOOS=linux GOARCH=${arch} go build -o=./bin/${build_dir}/${service_name} ./cmd/api
+
+
+# =========================================================================== #
+# PRODUCTION
+# =========================================================================== #
+
+production_host = homebugh.info
+deploy_user = deploy
+deploy_dir = ~/apps/homebugh-api/
+
+## production/deploy/api: deploy the api to production
+.PHONY: production/deploy/api
+production/deploy/api:
+	rsync -P ./bin/${build_dir}/${service_name} ${deploy_user}@${production_host}:${deploy_dir}
+	ssh -t deploy@${production_host} 'sudo systemctl restart ${service_name}'
+
+## production/deploy/systemdconfig: deploy the systemd config to production
+.PHONY: production/deploy/systemdconfig
+production/deploy/systemdconfig:
+	rsync -P ./remote/production/${service_name}.service ${deploy_user}@${production_host}:~
+	ssh -t ${deploy_user}@${production_host} '\
+		sudo mv ~/${service_name}.service /etc/systemd/system/ \
+		&& sudo systemctl enable ${service_name} \
+		&& sudo systemctl restart ${service_name} \
+	'
+
+## production/status/api: prints api service status
+.PHONY: production/status/api
+production/status/api:
+	ssh -t ${deploy_user}@${production_host} 'sudo systemctl status ${service_name}'
+	@echo "\n------------------------------------------"
+	curl https://api.${production_host}:8080/health
+	@echo ""
+
+## production/restart/api: restarts api service status
+.PHONY: production/restart/api
+production/restart/api:
+	ssh -t ${deploy_user}@${production_host} 'sudo systemctl restart ${service_name}'
