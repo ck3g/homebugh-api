@@ -14,17 +14,41 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type application struct {
+const version = "0.0.1"
+
+var (
+	build     string
+	buildTime string
+)
+
+type appMetadata struct {
+	buildTime   string
 	environment string
-	models      models.Models
+	version     string
+}
+
+type application struct {
+	metadata appMetadata
+	models   models.Models
 }
 
 func main() {
 	configFile := flag.String("config", "./config.yml", "The app configuration file path")
 	environment := flag.String("env", "development", "Current app environment. [production|development|test]")
+
+	displayVersion := flag.Bool("version", false, "Display version and exit")
 	flag.Parse()
 
-	env := setEnv(*environment)
+	metadata := appMetadata{
+		buildTime:   buildTime,
+		environment: setEnv(*environment),
+		version:     fmt.Sprintf("%s+%s", version, build),
+	}
+
+	if *displayVersion {
+		printVersionInfo(metadata)
+		os.Exit(0)
+	}
 
 	f, err := os.Open(*configFile)
 	if err != nil {
@@ -40,14 +64,14 @@ func main() {
 		panic("cannot parse the config file")
 	}
 
-	db, err := openDB(cfg.dsn(env))
+	db, err := openDB(cfg.dsn(metadata.environment))
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
 	app := &application{
-		environment: env,
+		metadata: metadata,
 		models: models.Models{
 			Users:        &mysql.UserModel{DB: db},
 			AuthSessions: &mysql.AuthSessionModel{DB: db},
@@ -67,8 +91,9 @@ func main() {
 	}
 
 	fmt.Println()
-	fmt.Printf("The application starting in %s\n", env)
-	fmt.Printf("Listening on %s, CTRL+C to stop\n", srv.Addr)
+	fmt.Printf("The application starting in %s\n\n", app.metadata.environment)
+	printVersionInfo(app.metadata)
+	fmt.Printf("\nListening on %s, CTRL+C to stop\n", srv.Addr)
 	err = srv.ListenAndServeTLS(cfg.TLS.CertPemFile, cfg.TLS.KeyPemFile)
 	if err != nil {
 		fmt.Println(err)
@@ -96,4 +121,9 @@ func setEnv(env string) string {
 	}
 
 	return "development"
+}
+
+func printVersionInfo(metadata appMetadata) {
+	fmt.Printf("Version:\t%s\n", metadata.version)
+	fmt.Printf("Build time:\t%s\n", metadata.buildTime)
 }

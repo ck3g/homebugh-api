@@ -49,12 +49,16 @@ arch = 386
 build_dir = linux_${arch}
 service_name = homebugh-api
 
+current_time = $(shell date +%Y-%m-%dT%H:%M:%S%z)
+git_description = $(shell git describe --always --dirty --tags --long)
+linker_flags = "-s -X 'main.buildTime=${current_time}' -X 'main.build=${git_description}'"
+
 ## build/api: build the cmd/api application
 .PHONY: build/api
 build/api:
 	@echo 'Building cmd/api...'
-	go build -o=./bin/${service_name} ./cmd/api
-	GOOS=linux GOARCH=${arch} go build -o=./bin/${build_dir}/${service_name} ./cmd/api
+	go build -ldflags=${linker_flags} -o=./bin/${service_name} ./cmd/api
+	GOOS=linux GOARCH=${arch} go build -ldflags=${linker_flags} -o=./bin/${build_dir}/${service_name} ./cmd/api
 
 
 # =========================================================================== #

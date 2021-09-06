@@ -37,7 +37,7 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 	}()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if app.environment == "production" {
+		if app.metadata.environment == "production" {
 			ip := realip.FromRequest(r)
 
 			mu.Lock()
