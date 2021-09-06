@@ -22,14 +22,14 @@ var (
 )
 
 type appMetadata struct {
-	version   string
-	buildTime string
+	buildTime   string
+	environment string
+	version     string
 }
 
 type application struct {
-	environment string
-	metadata    appMetadata
-	models      models.Models
+	metadata appMetadata
+	models   models.Models
 }
 
 func main() {
@@ -40,16 +40,15 @@ func main() {
 	flag.Parse()
 
 	metadata := appMetadata{
-		version:   fmt.Sprintf("%s+%s", version, build),
-		buildTime: buildTime,
+		buildTime:   buildTime,
+		environment: setEnv(*environment),
+		version:     fmt.Sprintf("%s+%s", version, build),
 	}
 
 	if *displayVersion {
 		printVersionInfo(metadata)
 		os.Exit(0)
 	}
-
-	env := setEnv(*environment)
 
 	f, err := os.Open(*configFile)
 	if err != nil {
@@ -65,15 +64,14 @@ func main() {
 		panic("cannot parse the config file")
 	}
 
-	db, err := openDB(cfg.dsn(env))
+	db, err := openDB(cfg.dsn(metadata.environment))
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
 	app := &application{
-		environment: env,
-		metadata:    metadata,
+		metadata: metadata,
 		models: models.Models{
 			Users:        &mysql.UserModel{DB: db},
 			AuthSessions: &mysql.AuthSessionModel{DB: db},
@@ -93,7 +91,7 @@ func main() {
 	}
 
 	fmt.Println()
-	fmt.Printf("The application starting in %s\n\n", env)
+	fmt.Printf("The application starting in %s\n\n", app.metadata.environment)
 	printVersionInfo(app.metadata)
 	fmt.Printf("\nListening on %s, CTRL+C to stop\n", srv.Addr)
 	err = srv.ListenAndServeTLS(cfg.TLS.CertPemFile, cfg.TLS.KeyPemFile)
