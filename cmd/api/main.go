@@ -14,8 +14,21 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const version = "0.0.1"
+
+var (
+	build     string
+	buildTime string
+)
+
+type appMetadata struct {
+	version   string
+	buildTime string
+}
+
 type application struct {
 	environment string
+	metadata    appMetadata
 	models      models.Models
 }
 
@@ -48,6 +61,10 @@ func main() {
 
 	app := &application{
 		environment: env,
+		metadata: appMetadata{
+			version:   fmt.Sprintf("%s+%s", version, build),
+			buildTime: buildTime,
+		},
 		models: models.Models{
 			Users:        &mysql.UserModel{DB: db},
 			AuthSessions: &mysql.AuthSessionModel{DB: db},
@@ -67,8 +84,10 @@ func main() {
 	}
 
 	fmt.Println()
-	fmt.Printf("The application starting in %s\n", env)
-	fmt.Printf("Listening on %s, CTRL+C to stop\n", srv.Addr)
+	fmt.Printf("The application starting in %s\n\n", env)
+	fmt.Printf("Version:\t%s\n", app.metadata.version)
+	fmt.Printf("Build time:\t%s\n", app.metadata.buildTime)
+	fmt.Printf("\nListening on %s, CTRL+C to stop\n", srv.Addr)
 	err = srv.ListenAndServeTLS(cfg.TLS.CertPemFile, cfg.TLS.KeyPemFile)
 	if err != nil {
 		fmt.Println(err)
