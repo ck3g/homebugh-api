@@ -35,7 +35,19 @@ type application struct {
 func main() {
 	configFile := flag.String("config", "./config.yml", "The app configuration file path")
 	environment := flag.String("env", "development", "Current app environment. [production|development|test]")
+
+	displayVersion := flag.Bool("version", false, "Display version and exit")
 	flag.Parse()
+
+	metadata := appMetadata{
+		version:   fmt.Sprintf("%s+%s", version, build),
+		buildTime: buildTime,
+	}
+
+	if *displayVersion {
+		printVersionInfo(metadata)
+		os.Exit(0)
+	}
 
 	env := setEnv(*environment)
 
@@ -61,10 +73,7 @@ func main() {
 
 	app := &application{
 		environment: env,
-		metadata: appMetadata{
-			version:   fmt.Sprintf("%s+%s", version, build),
-			buildTime: buildTime,
-		},
+		metadata:    metadata,
 		models: models.Models{
 			Users:        &mysql.UserModel{DB: db},
 			AuthSessions: &mysql.AuthSessionModel{DB: db},
@@ -85,8 +94,7 @@ func main() {
 
 	fmt.Println()
 	fmt.Printf("The application starting in %s\n\n", env)
-	fmt.Printf("Version:\t%s\n", app.metadata.version)
-	fmt.Printf("Build time:\t%s\n", app.metadata.buildTime)
+	printVersionInfo(app.metadata)
 	fmt.Printf("\nListening on %s, CTRL+C to stop\n", srv.Addr)
 	err = srv.ListenAndServeTLS(cfg.TLS.CertPemFile, cfg.TLS.KeyPemFile)
 	if err != nil {
@@ -115,4 +123,9 @@ func setEnv(env string) string {
 	}
 
 	return "development"
+}
+
+func printVersionInfo(metadata appMetadata) {
+	fmt.Printf("Version:\t%s\n", metadata.version)
+	fmt.Printf("Build time:\t%s\n", metadata.buildTime)
 }
