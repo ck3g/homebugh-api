@@ -10,13 +10,13 @@ type CategoryModel struct {
 	DB *sql.DB
 }
 
-func (m *CategoryModel) Insert(name string, categoryTypeID models.CategoryTypeID, userID int64, inactive bool) (int64, error) {
+func (m *CategoryModel) Insert(name string, categoryType models.CategoryType, userID int64, inactive bool) (int64, error) {
 	var id int64
 
 	stmt := `INSERT INTO categories (name, category_type_id, user_id, inactive, updated_at)
 	VALUES (?, ?, ?, ?, UTC_TIMESTAMP())`
 
-	res, err := m.DB.Exec(stmt, name, categoryTypeID, userID, inactive)
+	res, err := m.DB.Exec(stmt, name, categoryType.ID, userID, inactive)
 	if err != nil {
 		return id, err
 	}
@@ -32,10 +32,11 @@ func (m *CategoryModel) Insert(name string, categoryTypeID models.CategoryTypeID
 func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Category, models.Metadata, error) {
 	categories := []*models.Category{}
 
-	stmt := `SELECT id, name, category_type_id, user_id, inactive, updated_at
-	FROM categories
-	WHERE user_id = ?
-	ORDER BY id
+	stmt := `SELECT c.id, c.name, c.category_type_id, ct.name, c.user_id, c.inactive, c.updated_at
+	FROM categories AS c
+	INNER JOIN category_types AS ct ON c.category_type_id = ct.id
+	WHERE c.user_id = ?
+	ORDER BY c.id
 	LIMIT ? OFFSET ?`
 
 	rows, err := m.DB.Query(stmt, userID, filters.Limit(), filters.Offset())
@@ -50,7 +51,8 @@ func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Cat
 		err := rows.Scan(
 			&category.ID,
 			&category.Name,
-			&category.CategoryTypeID,
+			&category.CategoryType.ID,
+			&category.CategoryType.Name,
 			&category.UserID,
 			&category.Inactive,
 			&category.UpdatedAt,
@@ -63,7 +65,10 @@ func (m *CategoryModel) All(userID int64, filters models.Filters) ([]*models.Cat
 	}
 
 	totalRecords := 0
-	countStmt := `SELECT COUNT(*) FROM categories WHERE user_id = ?`
+	countStmt := `SELECT COUNT(c.id)
+	FROM categories AS c
+	INNER JOIN category_types AS ct ON c.category_type_id = ct.id
+	WHERE user_id = ?`
 	err = m.DB.QueryRow(countStmt, userID).Scan(&totalRecords)
 	if err != nil {
 		return categories, models.Metadata{}, err

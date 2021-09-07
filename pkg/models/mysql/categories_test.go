@@ -12,7 +12,7 @@ func TestCategoryInsert(t *testing.T) {
 		defer teardown()
 
 		categories := &CategoryModel{db}
-		expense := models.CategoryTypeID(2)
+		expense := models.CategoryType{ID: 2, Name: "expense"}
 		id, err := categories.Insert("Food", expense, 1, false)
 		if err != nil {
 			t.Fatal(err)
@@ -41,8 +41,12 @@ func TestCategoryInsert(t *testing.T) {
 			t.Errorf("want Name '%s'; got '%s'", "Food", category.Name)
 		}
 
-		if category.CategoryTypeID != expense {
-			t.Errorf("want CategoryTypeID %d; got %d", expense, category.CategoryTypeID)
+		if category.CategoryType.ID != expense.ID {
+			t.Errorf("want CategoryType.ID %d; got %d", expense.ID, category.CategoryType.ID)
+		}
+
+		if category.CategoryType.Name != expense.Name {
+			t.Errorf("want CategoryType.Name %s; got %s", expense.Name, category.CategoryType.Name)
 		}
 
 		if category.UserID != 1 {
@@ -60,18 +64,18 @@ func TestCategoryAll(t *testing.T) {
 	defer teardown()
 
 	categories := &CategoryModel{db}
-	income := models.CategoryTypeID(1)
-	expense := models.CategoryTypeID(2)
+	income := models.CategoryType{ID: 1, Name: "income"}
+	expense := models.CategoryType{ID: 2, Name: "expense"}
 
 	allCategories := map[int]*models.Category{
-		0: {Name: "Food", CategoryTypeID: expense, UserID: 1, Inactive: true},
-		1: {Name: "Clothes", CategoryTypeID: expense, UserID: 2},
-		2: {Name: "Salary", CategoryTypeID: income, UserID: 2},
+		0: {Name: "Food", CategoryType: expense, UserID: 1, Inactive: true},
+		1: {Name: "Clothes", CategoryType: expense, UserID: 2},
+		2: {Name: "Salary", CategoryType: income, UserID: 2},
 	}
 	ids := map[int]int64{}
 
 	for i, c := range allCategories {
-		id, err := categories.Insert(c.Name, c.CategoryTypeID, c.UserID, c.Inactive)
+		id, err := categories.Insert(c.Name, c.CategoryType, c.UserID, c.Inactive)
 		if err != nil {
 			t.Fatal(err)
 		}
