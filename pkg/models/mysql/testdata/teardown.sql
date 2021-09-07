@@ -1,3 +1,4 @@
-DELETE FROM users;
-DELETE FROM auth_sessions;
-DELETE FROM categories;
+TRUNCATE TABLE users;
+TRUNCATE TABLE auth_sessions;
+TRUNCATE TABLE categories;
+TRUNCATE TABLE category_types;

@@ -48,21 +48,24 @@ type AuthSessionStorage interface {
 	Delete(id int64) error
 }
 
-// CategoryTypeID represends a category type: 1 - income, 2 - expense
-type CategoryTypeID int64
+// CategoryType represends a category type: with ID = 1 - income, ID = 2 - expense
+type CategoryType struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
 
 // Category represents an expense category
 type Category struct {
-	ID             int64          `json:"id"`
-	Name           string         `json:"name"`
-	CategoryTypeID CategoryTypeID `json:"category_type_id"`
-	UserID         int64          `json:"-"`
-	Inactive       bool           `json:"inactive"`
-	UpdatedAt      *time.Time     `json:"-"`
+	ID           int64        `json:"id"`
+	Name         string       `json:"name"`
+	CategoryType CategoryType `json:"category_type"`
+	UserID       int64        `json:"-"`
+	Inactive     bool         `json:"inactive"`
+	UpdatedAt    *time.Time   `json:"-"`
 }
 
 type CategoryStorage interface {
-	Insert(name string, typeID CategoryTypeID, userID int64, inactive bool) (int64, error)
+	Insert(name string, categoryType CategoryType, userID int64, inactive bool) (int64, error)
 	All(userID int64, filters Filters) ([]*Category, Metadata, error)
 }
 

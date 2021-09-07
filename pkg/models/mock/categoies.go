@@ -6,26 +6,26 @@ import (
 
 var (
 	foodCategory = &models.Category{
-		ID:             1,
-		Name:           "Food",
-		CategoryTypeID: 2,
-		UserID:         1,
-		Inactive:       false,
-		UpdatedAt:      &oneDayAgo,
+		ID:           1,
+		Name:         "Food",
+		CategoryType: models.CategoryType{ID: 2, Name: "expense"},
+		UserID:       1,
+		Inactive:     false,
+		UpdatedAt:    &oneDayAgo,
 	}
 	secondUserFoodCategory = &models.Category{
-		ID:             2,
-		Name:           "Groceries",
-		CategoryTypeID: 2,
-		UserID:         2,
-		Inactive:       false,
-		UpdatedAt:      &oneDayAgo,
+		ID:           2,
+		Name:         "Groceries",
+		CategoryType: models.CategoryType{ID: 2, Name: "expense"},
+		UserID:       2,
+		Inactive:     false,
+		UpdatedAt:    &oneDayAgo,
 	}
 )
 
 type CategoryModel struct{}
 
-func (m *CategoryModel) Insert(name string, categoryTypeID models.CategoryTypeID, userID int64, inactive bool) (int64, error) {
+func (m *CategoryModel) Insert(name string, categoryType models.CategoryType, userID int64, inactive bool) (int64, error) {
 	return 3, nil
 }
 
