@@ -5,10 +5,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/ck3g/homebugh-api/pkg/models"
+	"github.com/ck3g/homebugh-api/pkg/models/mock"
 )
 
 func TestAccountsHandler(t *testing.T) {
-	app := application{}
+	app := application{
+		models: models.Models{
+			AuthSessions: &mock.AuthSessionModel{},
+		},
+	}
 
 	ts := httptest.NewTLSServer(app.routes())
 	defer ts.Close()
@@ -24,6 +31,24 @@ func TestAccountsHandler(t *testing.T) {
 			token:          "Bearer valid-token",
 			wantStatusCode: http.StatusOK,
 			wantBody:       []byte(`{"accounts":[]}`),
+		},
+		{
+			name:           "with blank token",
+			token:          "",
+			wantStatusCode: http.StatusUnauthorized,
+			wantBody:       []byte(`{"error":"invalid or missing authentication token"}`),
+		},
+		{
+			name:           "with non-bearer token",
+			token:          "Notbearer valid-token",
+			wantStatusCode: http.StatusUnauthorized,
+			wantBody:       []byte(`{"error":"invalid or missing authentication token"}`),
+		},
+		{
+			name:           "with invalid token",
+			token:          "Bearer invalid-token",
+			wantStatusCode: http.StatusUnauthorized,
+			wantBody:       []byte(`{"error":"invalid or missing authentication token"}`),
 		},
 	}
 
