@@ -25,9 +25,10 @@ var (
 )
 
 type Models struct {
-	Users        UserStorage
+	Accounts     AccountStorage
 	AuthSessions AuthSessionStorage
 	Categories   CategoryStorage
+	Users        UserStorage
 }
 
 // Account represents a user's accounts

@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 	"strings"
+
+	"github.com/ck3g/homebugh-api/pkg/models"
 )
 
 func (app *application) accountsHandler(w http.ResponseWriter, r *http.Request) {
@@ -22,14 +24,27 @@ func (app *application) accountsHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	token := headerParts[1]
-	_, err := app.models.AuthSessions.GetByToken(token)
+	session, err := app.models.AuthSessions.GetByToken(token)
 	if err != nil {
 		app.invalidAuthenticationTokenResponse(w, r)
 		return
 	}
 
+	qs := r.URL.Query()
+	filters := models.Filters{
+		Page:     app.readInt(qs, "page", 1),
+		PageSize: app.readInt(qs, "page_size", 20),
+	}
+
+	accounts, metadata, err := app.models.Accounts.All(session.UserID, filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	env := envelope{
-		"accounts": []string{},
+		"accounts": accounts,
+		"metadata": metadata,
 	}
 
 	err = app.writeJSON(w, http.StatusOK, env, nil)

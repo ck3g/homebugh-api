@@ -13,7 +13,9 @@ import (
 func TestAccountsHandler(t *testing.T) {
 	app := application{
 		models: models.Models{
+			Accounts:     &mock.AccountModel{},
 			AuthSessions: &mock.AuthSessionModel{},
+			Users:        &mock.UserModel{},
 		},
 	}
 
@@ -30,7 +32,21 @@ func TestAccountsHandler(t *testing.T) {
 			name:           "With valid token",
 			token:          "Bearer valid-token",
 			wantStatusCode: http.StatusOK,
-			wantBody:       []byte(`{"accounts":[]}`),
+			wantBody: []byte(
+				`{"accounts":[` +
+					`{"id":1,"name":"Bank","balance":1000,"currency_id":1,"status":"active","show_in_summary":true},` +
+					`{"id":2,"name":"Cash","balance":100.5,"currency_id":1,"status":"active","show_in_summary":true}],` +
+					`"metadata":{"current_page":1,"page_size":20,"first_page":1,"last_page":1,"total_records":2}}`),
+		},
+		{
+			name:           "With valid token of second user",
+			token:          "Bearer valid-token-2",
+			wantStatusCode: http.StatusOK,
+			wantBody: []byte(
+				`{"accounts":[` +
+					`{"id":3,"name":"Bank","balance":500,"currency_id":1,"status":"active","show_in_summary":true},` +
+					`{"id":4,"name":"Cash","balance":30.5,"currency_id":1,"status":"active","show_in_summary":true}],` +
+					`"metadata":{"current_page":1,"page_size":20,"first_page":1,"last_page":1,"total_records":2}}`),
 		},
 		{
 			name:           "with blank token",
@@ -77,7 +93,7 @@ func TestAccountsHandler(t *testing.T) {
 			}
 
 			if string(body) != string(tt.wantBody) {
-				t.Errorf("want body to be equal to `%q`; got `%q`", tt.wantBody, string(body))
+				t.Errorf("want body to be equal to \n`%q`\ngot \n`%q`\n", tt.wantBody, string(body))
 			}
 		})
 	}
