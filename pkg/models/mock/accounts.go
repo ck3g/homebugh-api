@@ -39,6 +39,10 @@ var (
 	}
 )
 
+func (m *AccountModel) Insert(name string, userID int64, currencyID int64, status string, showInSummary bool) (int64, error) {
+	return 5, nil
+}
+
 func (m *AccountModel) All(userID int64, filters models.Filters) ([]*models.Account, models.Metadata, error) {
 	var accounts []*models.Account
 

@@ -1,4 +1,5 @@
-TRUNCATE TABLE users;
+TRUNCATE TABLE accounts;
 TRUNCATE TABLE auth_sessions;
 TRUNCATE TABLE categories;
 TRUNCATE TABLE category_types;
+TRUNCATE TABLE users;

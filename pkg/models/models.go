@@ -43,7 +43,7 @@ type Account struct {
 
 // AccountStorate contains information about user's accounts
 type AccountStorage interface {
-	// Insert(name string, userID int64, currencyID int64, status string, showInSummary bool) (int64, error)
+	Insert(name string, userID int64, currencyID int64, status string, showInSummary bool) (int64, error)
 	All(userID int64, filters Filters) ([]*Account, Metadata, error)
 }
 
