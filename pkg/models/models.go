@@ -30,6 +30,22 @@ type Models struct {
 	Categories   CategoryStorage
 }
 
+// Account represents a user's accounts
+type Account struct {
+	ID            int64   `json:"id"`
+	Name          string  `json:"name"`
+	Balance       float64 `json:"balance"`
+	CurrencyID    int64   `json:"currency_id"` // TODO: change to currency
+	Status        string  `json:"status"`
+	ShowInSummary bool    `json:"show_in_summary"`
+}
+
+// AccountStorate contains information about user's accounts
+type AccountStorage interface {
+	// Insert(name string, userID int64, currencyID int64, status string, showInSummary bool) (int64, error)
+	All(userID int64, filters Filters) ([]*Account, Metadata, error)
+}
+
 // AuthSession represents authentication session data
 type AuthSession struct {
 	ID        int64
