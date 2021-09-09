@@ -25,9 +25,26 @@ var (
 )
 
 type Models struct {
-	Users        UserStorage
+	Accounts     AccountStorage
 	AuthSessions AuthSessionStorage
 	Categories   CategoryStorage
+	Users        UserStorage
+}
+
+// Account represents a user's accounts
+type Account struct {
+	ID            int64    `json:"id"`
+	Name          string   `json:"name"`
+	Balance       float64  `json:"balance"`
+	Currency      Currency `json:"currency"`
+	Status        string   `json:"status"`
+	ShowInSummary bool     `json:"show_in_summary"`
+}
+
+// AccountStorate contains information about user's accounts
+type AccountStorage interface {
+	Insert(name string, userID int64, currencyID int64, status string, showInSummary bool) (int64, error)
+	All(userID int64, filters Filters) ([]*Account, Metadata, error)
 }
 
 // AuthSession represents authentication session data
@@ -67,6 +84,13 @@ type Category struct {
 type CategoryStorage interface {
 	Insert(name string, categoryType CategoryType, userID int64, inactive bool) (int64, error)
 	All(userID int64, filters Filters) ([]*Category, Metadata, error)
+}
+
+// Currency represents currencies model
+type Currency struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Unit string `json:"unit"`
 }
 
 // User represents a user data

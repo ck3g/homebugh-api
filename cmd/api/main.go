@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const version = "0.0.1"
+const version = "0.1.0"
 
 var (
 	build     string
@@ -73,9 +73,10 @@ func main() {
 	app := &application{
 		metadata: metadata,
 		models: models.Models{
-			Users:        &mysql.UserModel{DB: db},
+			Accounts:     &mysql.AccountModel{DB: db},
 			AuthSessions: &mysql.AuthSessionModel{DB: db},
 			Categories:   &mysql.CategoryModel{DB: db},
+			Users:        &mysql.UserModel{DB: db},
 		},
 	}
 

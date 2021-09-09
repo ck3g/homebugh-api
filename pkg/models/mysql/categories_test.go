@@ -30,6 +30,7 @@ func TestCategoryInsert(t *testing.T) {
 
 		if len(all) != 1 {
 			t.Errorf("want 1 category; got %d", len(all))
+			return
 		}
 
 		category := all[0]

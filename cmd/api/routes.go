@@ -13,5 +13,7 @@ func (app *application) routes() http.Handler {
 
 	mux.HandleFunc("/categories", app.categoriesHandler)
 
+	mux.HandleFunc("/accounts", app.accountsHandler)
+
 	return app.rateLimit(mux)
 }
