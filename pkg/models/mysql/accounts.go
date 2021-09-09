@@ -33,10 +33,11 @@ func (m *AccountModel) Insert(name string, userID int64, currencyID int64, statu
 func (m *AccountModel) All(userID int64, filters models.Filters) ([]*models.Account, models.Metadata, error) {
 	accounts := []*models.Account{}
 
-	query := `SELECT id, name, funds, currency_id, status, show_in_summary
-	FROM accounts
-	WHERE user_id = ?
-	ORDER BY id
+	query := `SELECT a.id, a.name, a.funds, a.currency_id, c.name, c.unit, a.status, a.show_in_summary
+	FROM accounts AS a
+	INNER JOIN currencies AS c ON a.currency_id = c.id
+	WHERE a.user_id = ?
+	ORDER BY a.id
 	LIMIT ? OFFSET ?`
 
 	rows, err := m.DB.Query(query, userID, filters.Limit(), filters.Offset())
@@ -52,7 +53,9 @@ func (m *AccountModel) All(userID int64, filters models.Filters) ([]*models.Acco
 			&account.ID,
 			&account.Name,
 			&account.Balance,
-			&account.CurrencyID,
+			&account.Currency.ID,
+			&account.Currency.Name,
+			&account.Currency.Unit,
 			&account.Status,
 			&account.ShowInSummary,
 		)
@@ -64,7 +67,10 @@ func (m *AccountModel) All(userID int64, filters models.Filters) ([]*models.Acco
 	}
 
 	totalRecords := 0
-	countQuery := `SELECT COUNT(ID) FROM accounts WHERE user_id = ?`
+	countQuery := `SELECT COUNT(a.id)
+	FROM accounts AS a
+	INNER JOIN currencies AS c ON a.currency_id = c.id
+	WHERE a.user_id = ?`
 	err = m.DB.QueryRow(countQuery, userID).Scan(&totalRecords)
 	if err != nil {
 		return accounts, models.Metadata{}, err

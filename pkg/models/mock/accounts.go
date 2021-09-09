@@ -5,11 +5,13 @@ import "github.com/ck3g/homebugh-api/pkg/models"
 type AccountModel struct{}
 
 var (
+	euro = models.Currency{ID: 1, Name: "Euro", Unit: "€"}
+
 	user1BankAccount = &models.Account{
 		ID:            1,
 		Name:          "Bank",
 		Balance:       1000,
-		CurrencyID:    1,
+		Currency:      euro,
 		Status:        "active",
 		ShowInSummary: true,
 	}
@@ -17,7 +19,7 @@ var (
 		ID:            2,
 		Name:          "Cash",
 		Balance:       100.5,
-		CurrencyID:    1,
+		Currency:      euro,
 		Status:        "active",
 		ShowInSummary: true,
 	}
@@ -25,7 +27,7 @@ var (
 		ID:            3,
 		Name:          "Bank",
 		Balance:       500,
-		CurrencyID:    1,
+		Currency:      euro,
 		Status:        "active",
 		ShowInSummary: true,
 	}
@@ -33,7 +35,7 @@ var (
 		ID:            4,
 		Name:          "Cash",
 		Balance:       30.5,
-		CurrencyID:    1,
+		Currency:      euro,
 		Status:        "active",
 		ShowInSummary: true,
 	}

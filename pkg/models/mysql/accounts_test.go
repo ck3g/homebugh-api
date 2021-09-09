@@ -41,8 +41,8 @@ func TestAccountInsert(t *testing.T) {
 			t.Errorf("want Name %s; got %s", "Bank", account.Name)
 		}
 
-		if account.CurrencyID != 1 {
-			t.Errorf("want CurrencyID %d; got %d", 1, account.CurrencyID)
+		if account.Currency.ID != 1 {
+			t.Errorf("want CurrencyID %d; got %d", 1, account.Currency.ID)
 		}
 
 		if account.Status != "active" {
@@ -61,6 +61,7 @@ func TestAccountAll(t *testing.T) {
 
 	accounts := &AccountModel{db}
 
+	currency := models.Currency{ID: 1, Name: "Euro", Unit: "€"}
 	accountsData := map[int]struct {
 		name          string
 		userID        int64
@@ -68,9 +69,9 @@ func TestAccountAll(t *testing.T) {
 		status        string
 		showInSummary bool
 	}{
-		0: {"Bank", 1, 1, "active", true},
-		1: {"Bank", 2, 1, "active", true},
-		2: {"Cash", 1, 1, "active", true},
+		0: {"Bank", 1, currency.ID, "active", true},
+		1: {"Bank", 2, currency.ID, "active", true},
+		2: {"Cash", 1, currency.ID, "active", true},
 	}
 	ids := map[int]int64{}
 
@@ -98,8 +99,8 @@ func TestAccountAll(t *testing.T) {
 			wantCount:        2,
 			wantTotalRecords: 2,
 			wantAccounts: []*models.Account{
-				{ID: ids[0], Name: "Bank", CurrencyID: 1, Status: "active", ShowInSummary: true},
-				{ID: ids[2], Name: "Cash", CurrencyID: 1, Status: "active", ShowInSummary: true},
+				{ID: ids[0], Name: "Bank", Currency: currency, Status: "active", ShowInSummary: true},
+				{ID: ids[2], Name: "Cash", Currency: currency, Status: "active", ShowInSummary: true},
 			},
 		},
 		{
@@ -109,7 +110,7 @@ func TestAccountAll(t *testing.T) {
 			wantCount:        1,
 			wantTotalRecords: 2,
 			wantAccounts: []*models.Account{
-				{ID: ids[0], Name: "Bank", CurrencyID: 1, Status: "active", ShowInSummary: true},
+				{ID: ids[0], Name: "Bank", Currency: currency, Status: "active", ShowInSummary: true},
 			},
 		},
 		{
@@ -119,7 +120,7 @@ func TestAccountAll(t *testing.T) {
 			wantCount:        1,
 			wantTotalRecords: 2,
 			wantAccounts: []*models.Account{
-				{ID: ids[2], Name: "Cash", CurrencyID: 1, Status: "active", ShowInSummary: true},
+				{ID: ids[2], Name: "Cash", Currency: currency, Status: "active", ShowInSummary: true},
 			},
 		},
 		{
@@ -137,7 +138,7 @@ func TestAccountAll(t *testing.T) {
 			wantCount:        1,
 			wantTotalRecords: 2,
 			wantAccounts: []*models.Account{
-				{ID: ids[0], Name: "Bank", CurrencyID: 1, Status: "active", ShowInSummary: true},
+				{ID: ids[0], Name: "Bank", Currency: currency, Status: "active", ShowInSummary: true},
 			},
 		},
 	}
@@ -168,8 +169,16 @@ func TestAccountAll(t *testing.T) {
 					t.Errorf("want Name %s; got %s", wantAccount.Name, got.Name)
 				}
 
-				if got.CurrencyID != wantAccount.CurrencyID {
-					t.Errorf("want CurrencyID %d; got %d", wantAccount.CurrencyID, got.CurrencyID)
+				if got.Currency.ID != wantAccount.Currency.ID {
+					t.Errorf("want Currency.ID %d; got %d", wantAccount.Currency.ID, got.Currency.ID)
+				}
+
+				if got.Currency.Name != wantAccount.Currency.Name {
+					t.Errorf("want Currency.Name %s; got %s", wantAccount.Currency.Name, got.Currency.Name)
+				}
+
+				if got.Currency.Unit != wantAccount.Currency.Unit {
+					t.Errorf("want Currency.Unit %s; got %s", wantAccount.Currency.Unit, got.Currency.Unit)
 				}
 
 				if got.Status != wantAccount.Status {

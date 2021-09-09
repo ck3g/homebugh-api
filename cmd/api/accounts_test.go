@@ -34,8 +34,12 @@ func TestAccountsHandler(t *testing.T) {
 			wantStatusCode: http.StatusOK,
 			wantBody: []byte(
 				`{"accounts":[` +
-					`{"id":1,"name":"Bank","balance":1000,"currency_id":1,"status":"active","show_in_summary":true},` +
-					`{"id":2,"name":"Cash","balance":100.5,"currency_id":1,"status":"active","show_in_summary":true}],` +
+					`{"id":1,"name":"Bank","balance":1000,` +
+					`"currency":{"id":1,"name":"Euro","unit":"€"},` +
+					`"status":"active","show_in_summary":true},` +
+					`{"id":2,"name":"Cash","balance":100.5,` +
+					`"currency":{"id":1,"name":"Euro","unit":"€"},` +
+					`"status":"active","show_in_summary":true}],` +
 					`"metadata":{"current_page":1,"page_size":20,"first_page":1,"last_page":1,"total_records":2}}`),
 		},
 		{
@@ -44,8 +48,12 @@ func TestAccountsHandler(t *testing.T) {
 			wantStatusCode: http.StatusOK,
 			wantBody: []byte(
 				`{"accounts":[` +
-					`{"id":3,"name":"Bank","balance":500,"currency_id":1,"status":"active","show_in_summary":true},` +
-					`{"id":4,"name":"Cash","balance":30.5,"currency_id":1,"status":"active","show_in_summary":true}],` +
+					`{"id":3,"name":"Bank","balance":500,` +
+					`"currency":{"id":1,"name":"Euro","unit":"€"},` +
+					`"status":"active","show_in_summary":true},` +
+					`{"id":4,"name":"Cash","balance":30.5,` +
+					`"currency":{"id":1,"name":"Euro","unit":"€"},` +
+					`"status":"active","show_in_summary":true}],` +
 					`"metadata":{"current_page":1,"page_size":20,"first_page":1,"last_page":1,"total_records":2}}`),
 		},
 		{

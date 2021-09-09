@@ -33,12 +33,12 @@ type Models struct {
 
 // Account represents a user's accounts
 type Account struct {
-	ID            int64   `json:"id"`
-	Name          string  `json:"name"`
-	Balance       float64 `json:"balance"`
-	CurrencyID    int64   `json:"currency_id"` // TODO: change to currency
-	Status        string  `json:"status"`
-	ShowInSummary bool    `json:"show_in_summary"`
+	ID            int64    `json:"id"`
+	Name          string   `json:"name"`
+	Balance       float64  `json:"balance"`
+	Currency      Currency `json:"currency"`
+	Status        string   `json:"status"`
+	ShowInSummary bool     `json:"show_in_summary"`
 }
 
 // AccountStorate contains information about user's accounts
@@ -84,6 +84,13 @@ type Category struct {
 type CategoryStorage interface {
 	Insert(name string, categoryType CategoryType, userID int64, inactive bool) (int64, error)
 	All(userID int64, filters Filters) ([]*Category, Metadata, error)
+}
+
+// Currency represents currencies model
+type Currency struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Unit string `json:"unit"`
 }
 
 // User represents a user data
