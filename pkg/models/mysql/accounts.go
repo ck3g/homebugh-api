@@ -36,9 +36,10 @@ func (m *AccountModel) All(userID int64, filters models.Filters) ([]*models.Acco
 	query := `SELECT id, name, funds, currency_id, status, show_in_summary
 	FROM accounts
 	WHERE user_id = ?
-	ORDER BY id`
+	ORDER BY id
+	LIMIT ? OFFSET ?`
 
-	rows, err := m.DB.Query(query, userID)
+	rows, err := m.DB.Query(query, userID, filters.Limit(), filters.Offset())
 	if err != nil {
 		return accounts, models.Metadata{}, err
 	}
@@ -62,7 +63,14 @@ func (m *AccountModel) All(userID int64, filters models.Filters) ([]*models.Acco
 		accounts = append(accounts, &account)
 	}
 
-	metadata := models.CalculateMetadata(1, filters.CurrentPage(), filters.Limit())
+	totalRecords := 0
+	countQuery := `SELECT COUNT(ID) FROM accounts WHERE user_id = ?`
+	err = m.DB.QueryRow(countQuery, userID).Scan(&totalRecords)
+	if err != nil {
+		return accounts, models.Metadata{}, err
+	}
+
+	metadata := models.CalculateMetadata(totalRecords, filters.CurrentPage(), filters.Limit())
 
 	return accounts, metadata, nil
 }
