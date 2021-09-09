@@ -73,9 +73,10 @@ func main() {
 	app := &application{
 		metadata: metadata,
 		models: models.Models{
-			Users:        &mysql.UserModel{DB: db},
+			Accounts:     &mysql.AccountModel{DB: db},
 			AuthSessions: &mysql.AuthSessionModel{DB: db},
 			Categories:   &mysql.CategoryModel{DB: db},
+			Users:        &mysql.UserModel{DB: db},
 		},
 	}
 
