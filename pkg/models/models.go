@@ -24,6 +24,8 @@ var (
 	ErrUserNotConfirmed = errors.New("users: not confirmed")
 )
 
+var AnonymousSession = &AuthSession{}
+
 type Models struct {
 	Accounts     AccountStorage
 	AuthSessions AuthSessionStorage
@@ -111,4 +113,8 @@ type UserStorage interface {
 	GetByEmail(email string) (*User, error)
 	Insert(email, password string) (int64, error)
 	Delete(id int64) error
+}
+
+func (s *AuthSession) IsAnonymous() bool {
+	return s == AnonymousSession
 }
