@@ -30,6 +30,10 @@ func (app *application) accountsHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	r = app.contextSetSession(r, session)
+
+	session = app.contextGetSession(r)
+
 	qs := r.URL.Query()
 	filters := models.Filters{
 		Page:     app.readInt(qs, "page", 1),
