@@ -9,6 +9,10 @@ import (
 )
 
 func TestAuthSessionInsert(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	t.Run("successful insert", func(t *testing.T) {
 		db, teardown := newTestDB(t)
 		defer teardown()
@@ -60,6 +64,10 @@ func TestAuthSessionInsert(t *testing.T) {
 }
 
 func TestAuthSessionGet(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	db, teardown := newTestDB(t)
 	defer teardown()
 
@@ -91,6 +99,10 @@ func TestAuthSessionGet(t *testing.T) {
 }
 
 func TestAuthSessionGetByToken(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	db, teardown := newTestDB(t)
 	defer teardown()
 
@@ -128,6 +140,10 @@ func TestAuthSessionGetByToken(t *testing.T) {
 }
 
 func TestAuthSessionDelete(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	db, teardown := newTestDB(t)
 	defer teardown()
 
