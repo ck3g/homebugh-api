@@ -50,7 +50,7 @@ func TestCategoriesHandler(t *testing.T) {
 			name:           "With blank token",
 			token:          "",
 			wantStatusCode: http.StatusUnauthorized,
-			wantBody:       []byte(`{"error":"invalid or missing authentication token"}`),
+			wantBody:       []byte(`{"error":"you must be authenticated to access this resourse"}`),
 		},
 		{
 			name:           "With non bearer token",

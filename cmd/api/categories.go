@@ -2,36 +2,12 @@ package main
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/ck3g/homebugh-api/pkg/models"
 )
 
 func (app *application) categoriesHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Vary", "Authorization")
-
-	authorizationHeader := r.Header.Get("Authorization")
-	if authorizationHeader == "" {
-		app.invalidAuthenticationTokenResponse(w, r)
-		return
-	}
-
-	headerParts := strings.Split(authorizationHeader, " ")
-	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		app.invalidAuthenticationTokenResponse(w, r)
-		return
-	}
-
-	token := headerParts[1]
-	session, err := app.models.AuthSessions.GetByToken(token)
-	if err != nil {
-		app.invalidAuthenticationTokenResponse(w, r)
-		return
-	}
-
-	r = app.contextSetSession(r, session)
-
-	session = app.contextGetSession(r)
+	session := app.contextGetSession(r)
 
 	qs := r.URL.Query()
 	filters := models.Filters{

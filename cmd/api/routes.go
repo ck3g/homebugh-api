@@ -11,9 +11,9 @@ func (app *application) routes() http.Handler {
 
 	mux.HandleFunc("/token", app.createTokenHandler)
 
-	mux.HandleFunc("/categories", app.categoriesHandler)
+	mux.HandleFunc("/categories", app.requireAuthentication(app.categoriesHandler))
 
-	mux.HandleFunc("/accounts", app.accountsHandler)
+	mux.HandleFunc("/accounts", app.requireAuthentication(app.accountsHandler))
 
-	return app.rateLimit(mux)
+	return app.rateLimit(app.authenticate(mux))
 }
