@@ -7,6 +7,10 @@ import (
 )
 
 func TestAccountInsert(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	t.Run("successful insert", func(t *testing.T) {
 		db, teardown := newTestDB(t)
 		defer teardown()
@@ -56,6 +60,10 @@ func TestAccountInsert(t *testing.T) {
 }
 
 func TestAccountAll(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	db, teardown := newTestDB(t)
 	defer teardown()
 

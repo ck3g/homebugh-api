@@ -10,6 +10,10 @@ import (
 )
 
 func TestUserConfirm(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	db, teardown := newTestDB(t)
 	defer teardown()
 
@@ -43,6 +47,10 @@ func TestUserConfirm(t *testing.T) {
 }
 
 func TestUserInsert(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	t.Run("successful insert", func(t *testing.T) {
 		db, teardown := newTestDB(t)
 		defer teardown()
@@ -89,6 +97,10 @@ func TestUserInsert(t *testing.T) {
 }
 
 func TestUserGet(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	t.Run("fetch existing user", func(t *testing.T) {
 		db, teardown := newTestDB(t)
 		defer teardown()
@@ -125,6 +137,10 @@ func TestUserGet(t *testing.T) {
 }
 
 func TestGetByEmail(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	db, teardown := newTestDB(t)
 	defer teardown()
 
@@ -161,6 +177,10 @@ func TestGetByEmail(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	db, teardown := newTestDB(t)
 	defer teardown()
 
@@ -188,6 +208,10 @@ func TestDelete(t *testing.T) {
 }
 
 func TestAuthenticate(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	t.Run("successful auth", func(t *testing.T) {
 		db, teardown := newTestDB(t)
 		defer teardown()
