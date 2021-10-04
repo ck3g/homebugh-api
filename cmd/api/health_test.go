@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/ck3g/homebugh-api/pkg/jsonh"
 )
 
 func TestHealthHandler(t *testing.T) {
@@ -33,8 +35,13 @@ func TestHealthHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	wantBody := `{"buildTime":"2021-09-06T14:40:56+0200","status":"OK","version":"0.0.1+test"}`
-	if string(body) != wantBody {
-		t.Errorf("want body to be equal to `%q`; got `%q`", wantBody, string(body))
+	wantBody := []byte(`
+		{
+			"buildTime": "2021-09-06T14:40:56+0200",
+			"status": "OK",
+			"version": "0.0.1+test"
+		}`)
+	if !jsonh.Equal(body, wantBody) {
+		t.Errorf("want body to be equal to `%q`; got `%q`", string(wantBody), string(body))
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ck3g/homebugh-api/pkg/jsonh"
 	"github.com/ck3g/homebugh-api/pkg/models"
 	"github.com/ck3g/homebugh-api/pkg/models/mock"
 )
@@ -82,7 +83,7 @@ func TestCreateTokenHandler(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if string(body) != string(tt.wantBody) {
+			if !jsonh.Equal(body, tt.wantBody) {
 				t.Errorf("want body to be equal to `%q`; got `%q`", tt.wantBody, body)
 			}
 		})

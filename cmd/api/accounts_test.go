@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ck3g/homebugh-api/pkg/jsonh"
 	"github.com/ck3g/homebugh-api/pkg/models"
 	"github.com/ck3g/homebugh-api/pkg/models/mock"
 )
@@ -32,29 +33,65 @@ func TestAccountsHandler(t *testing.T) {
 			name:           "With valid token",
 			token:          "Bearer valid-token",
 			wantStatusCode: http.StatusOK,
-			wantBody: []byte(
-				`{"accounts":[` +
-					`{"id":1,"name":"Bank","balance":1000,` +
-					`"currency":{"id":1,"name":"Euro","unit":"€"},` +
-					`"status":"active","show_in_summary":true},` +
-					`{"id":2,"name":"Cash","balance":100.5,` +
-					`"currency":{"id":1,"name":"Euro","unit":"€"},` +
-					`"status":"active","show_in_summary":true}],` +
-					`"metadata":{"current_page":1,"page_size":20,"first_page":1,"last_page":1,"total_records":2}}`),
+			wantBody: []byte(`
+				{
+					"accounts": [
+						{
+							"id": 1,
+							"name": "Bank",
+							"balance": 1000,
+							"currency": { "id": 1, "name": "Euro", "unit": "€" },
+							"status": "active",
+							"show_in_summary": true
+						},
+						{
+							"id": 2,
+							"name": "Cash",
+							"balance": 100.5,
+							"currency": { "id": 1, "name": "Euro", "unit": "€" },
+							"status": "active",
+							"show_in_summary": true
+						}
+					],
+					"metadata":{
+						"current_page": 1,
+						"page_size": 20,
+						"first_page": 1,
+						"last_page": 1,
+						"total_records":2
+					}}`),
 		},
 		{
 			name:           "With valid token of second user",
 			token:          "Bearer valid-token-2",
 			wantStatusCode: http.StatusOK,
-			wantBody: []byte(
-				`{"accounts":[` +
-					`{"id":3,"name":"Bank","balance":500,` +
-					`"currency":{"id":1,"name":"Euro","unit":"€"},` +
-					`"status":"active","show_in_summary":true},` +
-					`{"id":4,"name":"Cash","balance":30.5,` +
-					`"currency":{"id":1,"name":"Euro","unit":"€"},` +
-					`"status":"active","show_in_summary":true}],` +
-					`"metadata":{"current_page":1,"page_size":20,"first_page":1,"last_page":1,"total_records":2}}`),
+			wantBody: []byte(`
+				{
+					"accounts": [
+						{
+							"id": 3,
+							"name": "Bank",
+							"balance": 500,
+							"currency": { "id": 1, "name": "Euro", "unit": "€" },
+							"status": "active",
+							"show_in_summary": true
+						},
+						{
+							"id": 4,
+							"name": "Cash",
+							"balance": 30.5,
+							"currency": { "id": 1, "name": "Euro", "unit": "€" },
+							"status": "active",
+							"show_in_summary": true
+						}
+					],
+					"metadata":{
+						"current_page": 1,
+						"page_size": 20,
+						"first_page": 1,
+						"last_page": 1,
+						"total_records": 2
+					}}`),
 		},
 		{
 			name:           "with blank token",
@@ -100,7 +137,7 @@ func TestAccountsHandler(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if string(body) != string(tt.wantBody) {
+			if !jsonh.Equal(body, tt.wantBody) {
 				t.Errorf("want body to be equal to \n`%q`\ngot \n`%q`\n", tt.wantBody, string(body))
 			}
 		})
