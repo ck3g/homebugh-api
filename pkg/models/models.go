@@ -41,6 +41,7 @@ type Account struct {
 	Currency      Currency `json:"currency"`
 	Status        string   `json:"status"`
 	ShowInSummary bool     `json:"show_in_summary"`
+	UserID        int64    `json:"-"`
 }
 
 // AccountStorate contains information about user's accounts
@@ -117,4 +118,22 @@ type UserStorage interface {
 
 func (s *AuthSession) IsAnonymous() bool {
 	return s == AnonymousSession
+}
+
+// Transaction represents transactions model
+type Transaction struct {
+	ID        int64    `json:"id"`
+	Amount    float64  `json:"amount"`
+	Comment   string   `json:"comemnt"`
+	UserID    int64    `json:"-"`
+	Category  Category `json:"category"`
+	Account   Account  `json:"account"`
+	CreatedAt *time.Time
+	UpdatedAt *time.Time
+}
+
+// TransactionStorage defined interface for storing and retrieving transations data
+type TransactionStorage interface {
+	Insert(amount float64, comment string, userID, categoryID, accountID int64) (int64, error)
+	All(userID int64, filters Filters) ([]*Transaction, Metadata, error)
 }
