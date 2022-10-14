@@ -41,6 +41,7 @@ type Account struct {
 	Currency      Currency `json:"currency"`
 	Status        string   `json:"status"`
 	ShowInSummary bool     `json:"show_in_summary"`
+	UserID        int64    `json:"-"`
 }
 
 // AccountStorate contains information about user's accounts
@@ -133,6 +134,6 @@ type Transaction struct {
 
 // TransactionStorage defined interface for storing and retrieving transations data
 type TransactionStorage interface {
-	Insert(amount float64, comment string, userID, categoryID, AccountID int64) (int64, error)
+	Insert(amount float64, comment string, userID, categoryID, accountID int64) (int64, error)
 	All(userID int64, filters Filters) ([]*Transaction, Metadata, error)
 }
