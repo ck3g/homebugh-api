@@ -4,3 +4,4 @@ TRUNCATE TABLE categories;
 TRUNCATE TABLE category_types;
 TRUNCATE TABLE currencies;
 TRUNCATE TABLE users;
+TRUNCATE TABLE transactions;
