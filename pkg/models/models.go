@@ -31,6 +31,7 @@ type Models struct {
 	AuthSessions AuthSessionStorage
 	Categories   CategoryStorage
 	Users        UserStorage
+	Transactions TransactionStorage
 }
 
 // Account represents a user's accounts
@@ -122,14 +123,14 @@ func (s *AuthSession) IsAnonymous() bool {
 
 // Transaction represents transactions model
 type Transaction struct {
-	ID        int64    `json:"id"`
-	Amount    float64  `json:"amount"`
-	Comment   string   `json:"comemnt"`
-	UserID    int64    `json:"-"`
-	Category  Category `json:"category"`
-	Account   Account  `json:"account"`
-	CreatedAt *time.Time
-	UpdatedAt *time.Time
+	ID        int64      `json:"id"`
+	Amount    float64    `json:"amount"`
+	Comment   string     `json:"comment"`
+	UserID    int64      `json:"-"`
+	Category  Category   `json:"category"`
+	Account   Account    `json:"account"`
+	CreatedAt *time.Time `json:"-"`
+	UpdatedAt *time.Time `json:"-"`
 }
 
 // TransactionStorage defined interface for storing and retrieving transations data

@@ -3,6 +3,7 @@ package jsonh
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 )
 
 func Equal(j1, j2 []byte) bool {
@@ -17,4 +18,10 @@ func Equal(j1, j2 []byte) bool {
 	json.Unmarshal(j2, &json2)
 
 	return reflect.DeepEqual(json1, json2)
+}
+
+func Prettify(body []byte) string {
+	s := strings.ReplaceAll(string(body), "\t", "")
+	s = strings.ReplaceAll(s, "\n", "")
+	return s
 }
