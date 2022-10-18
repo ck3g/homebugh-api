@@ -15,5 +15,7 @@ func (app *application) routes() http.Handler {
 
 	mux.HandleFunc("/accounts", app.requireAuthentication(app.accountsHandler))
 
+	mux.HandleFunc("/transactions", app.requireAuthentication(app.transactionsHandler))
+
 	return app.rateLimit(app.authenticate(mux))
 }

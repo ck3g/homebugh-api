@@ -77,6 +77,7 @@ func main() {
 			AuthSessions: &mysql.AuthSessionModel{DB: db},
 			Categories:   &mysql.CategoryModel{DB: db},
 			Users:        &mysql.UserModel{DB: db},
+			Transactions: &mysql.TransactionModel{DB: db},
 		},
 	}
 
