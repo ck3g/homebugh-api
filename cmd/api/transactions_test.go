@@ -42,6 +42,7 @@ func TestTransactionsHandler(t *testing.T) {
 							"id": 1,
 							"amount": 20,
 							"comment": "food",
+							"created_at": "2022-10-31T16:24:05Z",
 							"category": {
 								"id": 1,
 								"name": "Food",
@@ -78,6 +79,7 @@ func TestTransactionsHandler(t *testing.T) {
 							"id": 2,
 							"amount": 5.5,
 							"comment": "food 2",
+							"created_at": "2022-10-31T16:25:10Z",
 							"category": {
 								"id": 2,
 								"name": "Groceries",

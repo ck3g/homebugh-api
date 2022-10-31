@@ -129,7 +129,7 @@ type Transaction struct {
 	UserID    int64      `json:"-"`
 	Category  Category   `json:"category"`
 	Account   Account    `json:"account"`
-	CreatedAt *time.Time `json:"-"`
+	CreatedAt *time.Time `json:"created_at"`
 	UpdatedAt *time.Time `json:"-"`
 }
 

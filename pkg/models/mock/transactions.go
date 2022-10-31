@@ -1,25 +1,33 @@
 package mock
 
-import "github.com/ck3g/homebugh-api/pkg/models"
+import (
+	"time"
+
+	"github.com/ck3g/homebugh-api/pkg/models"
+)
 
 type TransactionModel struct{}
 
 var (
+	createdAt1, _           = time.Parse(time.RFC3339, "2022-10-31T16:24:05Z")
+	createdAt2, _           = time.Parse(time.RFC3339, "2022-10-31T16:25:10Z")
 	user1ExpenseTransaction = &models.Transaction{
-		ID:       1,
-		Amount:   20.0,
-		Comment:  "food",
-		UserID:   1,
-		Category: *foodCategory,
-		Account:  *user1CashAccount,
+		ID:        1,
+		Amount:    20.0,
+		Comment:   "food",
+		UserID:    1,
+		Category:  *foodCategory,
+		Account:   *user1CashAccount,
+		CreatedAt: &createdAt1,
 	}
 	user2ExpenseTransaction = &models.Transaction{
-		ID:       2,
-		Amount:   5.5,
-		Comment:  "food 2",
-		UserID:   2,
-		Category: *secondUserFoodCategory,
-		Account:  *user2CashAccount,
+		ID:        2,
+		Amount:    5.5,
+		Comment:   "food 2",
+		UserID:    2,
+		Category:  *secondUserFoodCategory,
+		Account:   *user2CashAccount,
+		CreatedAt: &createdAt2,
 	}
 )
 

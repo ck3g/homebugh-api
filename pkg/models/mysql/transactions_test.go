@@ -61,6 +61,10 @@ func TestTransaction_Insert(t *testing.T) {
 			t.Errorf("want Comment %s; got %s", "some income", transaction.Comment)
 		}
 
+		if transaction.CreatedAt == nil {
+			t.Errorf("want CreatedAt to be present; got nil")
+		}
+
 		if transaction.Category.ID != categoryID {
 			t.Errorf("want Category.ID %d; got %d", categoryID, transaction.Category.ID)
 		}
